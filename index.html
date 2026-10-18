@@ -122,7 +122,7 @@ body.v-squads #view-squads{display:block}
 .fm-hs>div{background:rgba(0,0,0,.25);border-radius:8px;padding:6px 14px;text-align:center;min-width:70px}
 .fm-hs b{display:block;font-size:22px}.fm-hs span{font-size:10.5px;text-transform:uppercase;opacity:.85;letter-spacing:.06em}
 .fm-tabs{background:#1b2130;display:flex;gap:2px;padding:0 18px;border-bottom:1px solid #2c3446;overflow:auto}
-.fm-tab{padding:8px 16px;font-size:12.5px;color:#8d98ad;white-space:nowrap}.fm-tab.on{color:#fff;border-bottom:3px solid var(--clubc,#c8102e);font-weight:600}
+.fm-tab{padding:8px 16px;font-size:12.5px;color:#8d98ad;white-space:nowrap;cursor:pointer;user-select:none}.fm-tab:hover{color:#dfe5ee}.fm-tab.on{color:#fff;border-bottom:3px solid var(--clubc,#c8102e);font-weight:600}
 .fm-wrap{display:flex;gap:14px;padding:14px;align-items:flex-start}
 .fm-main{flex:1;min-width:0}.fm-side{width:380px;flex:none;display:flex;flex-direction:column;gap:12px}
 @media(max-width:1250px){.fm-wrap{flex-direction:column}.fm-side{width:100%}}
@@ -155,6 +155,23 @@ body.v-squads #view-squads{display:block}
 .fm .fx{padding:6px 0;border-bottom:1px solid #283044}.fm .fx:last-child{border:0}.fm .fxd{font-size:11.5px;color:#8d98ad}
 .fm .fxo{font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px}.fm .ha{font-size:10px;padding:2px 6px;border-radius:3px;color:#fff}.fm .ha.H{background:var(--clubc,#c8102e)}.fm .ha.A{background:#3b4660}.fm .fxp{margin-left:auto;font-size:11.5px;color:#8d98ad;font-weight:400}
 .fm .key{display:flex;flex-wrap:wrap;gap:12px;padding:8px 12px;font-size:11px;color:#8d98ad;border-top:1px solid #2b3347}.fm .key>span{display:inline-flex;align-items:center;gap:5px}
+.fm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:12px}
+.fm-col{display:flex;flex-direction:column;gap:12px}
+.fm table.kv td{text-align:right;padding:5px 6px}.fm table.kv td.l{text-align:left;color:#9aa5ba;font-weight:400}.fm table.kv td small{color:#8d98ad;font-weight:400}
+.fm .summ{font-size:13.5px;line-height:1.55;color:#dfe5ee;padding:4px 2px 8px}
+.fm .note{font-size:11.5px;color:#8d98ad;padding:8px 12px;border-top:1px solid #2b3347}
+.fm .lb{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12.5px}.fm .lb .r{width:16px;color:#8d98ad;text-align:right}.fm .lb .n{flex:1;color:#fff}.fm .lb .v{font-weight:800;color:#f6eb61}
+.pitch{position:relative;margin:4px auto;max-width:640px;aspect-ratio:68/80;border-radius:8px;border:2px solid rgba(255,255,255,.35);
+  background:repeating-linear-gradient(180deg,#1f6e3a 0 10%,#237a41 10% 20%);overflow:hidden}
+.pitch:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid rgba(255,255,255,.35)}
+.pitch:after{content:"";position:absolute;left:50%;top:50%;width:22%;aspect-ratio:1;border:2px solid rgba(255,255,255,.35);border-radius:50%;transform:translate(-50%,-50%)}
+.pitch .box1,.pitch .box2{position:absolute;left:22%;right:22%;height:15%;border:2px solid rgba(255,255,255,.35)}.pitch .box1{bottom:-2px}.pitch .box2{top:-2px}
+.pitch .pl{position:absolute;transform:translate(-50%,-50%);text-align:center;width:118px;z-index:2}
+.pitch .dot{width:38px;height:38px;border-radius:50%;margin:0 auto 3px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;
+  background:var(--clubc,#c8102e);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.pitch .pl.gk .dot{background:#f2c94c;color:#111}
+.pitch .pn{font-size:11.5px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000;line-height:1.15}.pitch .ps{font-size:10px;color:#e3f5e8;text-shadow:0 1px 2px #000}
+@media(max-width:700px){.pitch .pl{width:84px}.pitch .dot{width:28px;height:28px;font-size:11px}.pitch .pn{font-size:10px}}
 .fm .fm-foot{padding:0 16px 12px;font-size:11px;color:#6f7a90}.fm .muted{color:#8d98ad;font-size:13px}
 /* ===== Leagues in Focus ===== */
 body.v-leagues #view-overview{display:none}
@@ -204,7 +221,7 @@ body.v-leagues #view-leagues{display:block}
   .views .pick{margin-left:0;width:100%}.views .pick select{flex:1;min-width:0}
   .chartbox,.chartbox.tall{height:300px}
   .fm-top{padding:12px}.fm-club{font-size:22px}.fm-hs{margin-left:0}.fm-wrap{padding:8px}
-  .fm-tabs{display:none}
+  .fm-tabs{padding:0 6px}.fm-tab{padding:8px 10px}
 }
 </style>
 </head>
@@ -481,6 +498,35 @@ function render(D, fetchedAt, stale){
   $("updated").textContent = (D.lastUpdated || fetchedAt.toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})) + (stale?" (saved copy)":"");
 }
 
+
+/* ---------- club page tabs (shared by Squads + Scotland) ---------- */
+const FM_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+const FM_TAB={squads:"squad",spfl:"squad"};
+(function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&FM_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
+function tabBar(view){ return `<div class="fm-tabs" role="tablist">`+FM_TABS.map(([k,l])=>`<div class="fm-tab${FM_TAB[view]===k?' on':''}" role="tab" tabindex="0" onclick="fmTab('${view}','${k}')" onkeydown="if(event.key==='Enter')fmTab('${view}','${k}')">${l}</div>`).join("")+`</div>`; }
+function fmHash(view){ const sel=$(view==="squads"?"teampick":"spflpick"); if(!sel||!sel.value) return;
+  const h=`#${view}/${encodeURIComponent(sel.value)}/${FM_TAB[view]}`; if(location.hash!==h) try{ history.replaceState(null,"",h); }catch(e){ location.hash=h; } }
+function fmTab(view,k){ FM_TAB[view]=FM_TABS.some(t=>t[0]===k)?k:"squad"; fmHash(view); view==="squads"?renderSquad():renderSpfl(); }
+const fmPanel=(h,b,note)=>`<div class="fm-panel"><div class="fm-ph">${h}</div><div class="fm-pb">${b}</div>${note?`<div class="note">${note}</div>`:''}</div>`;
+const fmKV=rows=>`<table class="kv">`+rows.filter(Boolean).map(([k,v])=>`<tr><td class="l">${k}</td><td class="b">${v}</td></tr>`).join("")+`</table>`;
+function fmRank(list,key,val,asc){ const v=list.map(x=>x[key]).filter(x=>x!=null); if(val==null||!v.length) return ""; const r=1+v.filter(x=>asc?x<val:x>val).length; return ` <small>(${ordn(r)} of ${v.length})</small>`; }
+function fmBoard(title,list,key,fmt,n){ const L=list.filter(p=>p[key]!=null&&p[key]>0).sort((a,b)=>b[key]-a[key]||a.name.localeCompare(b.name)).slice(0,n||5);
+  return fmPanel(title, L.map((p,i)=>`<div class="lb"><span class="r">${i+1}</span><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span><span class="n">${esc(p.name)}</span><span class="v">${fmt?fmt(p):p[key]}</span></div>`).join("")||'<div class="muted">None yet</div>'); }
+function mostUsedXI(players){
+  const by=(a,b)=>(b.starts||0)-(a.starts||0)||(b.min||0)-(a.min||0)||(b.apps||0)-(a.apps||0)||a.name.localeCompare(b.name);
+  const gk=players.filter(p=>p.pos==="GK"&&(p.starts||0)>0).sort(by)[0];
+  const of=players.filter(p=>p.pos!=="GK"&&(p.starts||0)>0).sort(by);
+  return {xi:[gk,...of.slice(0,10)].filter(Boolean), next:of.slice(10,15)};
+}
+function pitchHtml(xi){
+  const lines=[["FWD",16],["MID",42],["DEF",68],["GK",88]];
+  const init=n=>n.split(/\s+/).map(w=>w[0]).join("").slice(0,3).toUpperCase();
+  const shape=["DEF","MID","FWD"].map(k=>xi.filter(p=>p.pos===k).length).join("-");
+  const dots=lines.map(([k,y])=>{ const L=xi.filter(p=>p.pos===k); return L.map((p,i)=>`<div class="pl${k==="GK"?' gk':''}" style="left:${(100*(i+1)/(L.length+1)).toFixed(1)}%;top:${y}%">
+    <div class="dot">${esc(p.no||init(p.name))}</div><div class="pn">${esc(p.short||p.name)}</div><div class="ps">${p.starts} start${p.starts===1?'':'s'}</div></div>`).join(""); }).join("");
+  return {shape, html:`<div class="pitch"><div class="box1"></div><div class="box2"></div>${dots}</div>`};
+}
+
 /* ---------- SQUADS view (FM-style club page) ---------- */
 const CLUBS = { // name: [code, primary, secondary, header text]
   "Arsenal":["ARS","#db0007","#9c824a","#fff"], "Aston Villa":["AVL","#670e36","#95bfe5","#fff"], "Bournemouth":["BOU","#b50e12","#111111","#fff"],
@@ -503,7 +549,7 @@ function extractSquads(t, D){
 }
 function fillTeamPicker(D){
   const sel=$("teampick"); const teams=[...new Set([...D.table.map(r=>r.team),...D.squads.map(r=>r.team)])].sort();
-  const want = sel.value || (location.hash.match(/^#squads\/(.+)$/)?decodeURIComponent(location.hash.split("/")[1]):null) || localStorage.getItem("foot-term-team") || "Liverpool";
+  const want = sel.value || (location.hash.match(/^#squads\/([^\/]+)/)?decodeURIComponent(location.hash.split("/")[1]):null) || localStorage.getItem("foot-term-team") || "Liverpool";
   sel.innerHTML = teams.map(t=>`<option${t===want?" selected":""}>${esc(t)}</option>`).join("");
   if(!teams.includes(want) && teams.includes("Liverpool")) sel.value="Liverpool";
 }
@@ -547,6 +593,58 @@ function renderSquad(){
   const maxGw=Math.max(0,...D.results.map(r=>r.gw||0));
   const prov=res.some(r=>/await/i.test(r.status));
   const covered=S.filter(p=>D.values[p.id]!=null).length;
+  const tab=FM_TAB.squads;
+  const TS=(D.teams||[]).find(x=>x.team===team)||{};
+  const f2=v=>v==null?'–':(+v).toFixed(2);
+  function plBody(){
+    const side=`<div class="fm-side">${fmPanel("Top performers",`<div class="sh">Goals</div>${top("g",p=>`${p.g} <small>(xG ${p.xg!=null?p.xg.toFixed(2):'–'})</small>`)}<div class="sh">Assists</div>${top("a",p=>`${p.a} <small>(xA ${p.xa!=null?p.xa.toFixed(2):'–'})</small>`)}<div class="sh">Form (avg FPL pts, recent games)</div>${top("form",p=>`${p.form.toFixed(1)} <small>pts/g</small>`)}`)}</div>`;
+    if(tab==="overview"){
+      const used=S.filter(p=>(p.apps||0)>0).length, ts=[...S].sort((a,b)=>b.g-a.g||b.a-a.a)[0], outN=S.filter(isOut).length, dbt=inj.length-outN;
+      const summ=T.pos?`${esc(team)} are <b>${ordn(T.pos)}</b> on <b>${T.pts}</b> points after ${T.P} games (${T.W} won, ${T.D} drawn, ${T.L} lost), scoring ${T.GF} and conceding ${T.GA}.`+
+        (TS.xG!=null?` Their chances add up to <b>${f2(TS.xG)} xG</b> for and <b>${f2(TS.xGA)} xGA</b> against, so they are ${TS.diff>=0?'scoring '+f2(TS.diff)+' more':'scoring '+f2(-TS.diff)+' fewer'} goals than the chances suggest.`:'')+
+        (ts&&ts.g?` Top scorer: <b>${esc(ts.name)}</b> (${ts.g}).`:'')+` ${used} players have featured; ${outN} out and ${dbt} doubtful right now.`:'No table data yet.';
+      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel("Season so far",`<div class="summ">${summ}</div>`+fmKV([["Position",ordn(T.pos)],["Points",`${d0(T.pts)} <small>(${T.P?(T.pts/T.P).toFixed(2):'–'} a game)</small>`],["Goals for / against",`${d0(T.GF)} / ${d0(T.GA)}`],
+        ["xG / xGA",`${f2(TS.xG)} / ${f2(TS.xGA)}`],["Clean sheets",d0(TS.cs)],["Yellow / red cards",`${d0(TS.yc)} / ${d0(TS.rc)}`],["Players used",used]]))}
+        <div class="fm-grid">${fmPanel("Team form · last 5",formh)}${fmPanel("Next 3 fixtures",nxh)}</div></div>${side}</div>`;
+    }
+    if(tab==="tactics"){
+      const {xi,next}=mostUsedXI(S.map(p=>({...p,short:p.name})));
+      if(xi.length<11) return `<div class="fm-wrap"><div class="fm-main">${fmPanel("Most-used XI from starts",'<div class="muted">Not enough starts yet to build an XI.</div>')}</div></div>`;
+      const P=pitchHtml(xi);
+      const list=xi.map(p=>`<div class="lb"><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span><span class="n">${esc(p.name)}</span><span class="v">${p.starts}</span></div>`).join("");
+      return `<div class="fm-wrap"><div class="fm-main">${fmPanel(`Most-used XI from starts · ${P.shape}`,P.html,
+        `The 11 players with the most league starts (the top goalkeeper plus the top 10 outfield players), placed by their FPL position. ${P.shape} is just how those positions split. It's not a real formation or a real line-up. Ties are broken by minutes.`)}</div>
+        <div class="fm-side">${fmPanel("XI · league starts",list)}${fmPanel("Next most starts",next.map(p=>`<div class="lb"><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span><span class="n">${esc(p.name)}</span><span class="v">${p.starts}</span></div>`).join("")||'<div class="muted">–</div>')}</div></div>`;
+    }
+    if(tab==="fixtures"){
+      const R=D.results.filter(r=>r.home===team||r.away===team).slice().reverse();
+      const rr=R.map(r=>{ const home=r.home===team, opp=home?r.away:r.home, lg=home?r.hg:r.ag, og=home?r.ag:r.hg, lx=home?r.hxg:r.axg, ox=home?r.axg:r.hxg, o=lg>og?"W":lg===og?"D":"L";
+        return `<tr><td>GW${esc(r.gw)}</td><td>${esc(r.date)}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td class="b">${lg}-${og}</td><td><span class="wdl ${o}">${o}</span></td><td>${lx!=null?lx.toFixed(2)+' - '+ox.toFixed(2):'–'}</td><td>${/await/i.test(r.status)?'awaiting FPL confirmation':''}</td></tr>`; }).join("");
+      const F=D.fixtures.filter(f=>f.home===team||f.away===team);
+      const fr=F.map(f=>{ const home=f.home===team, opp=home?f.away:f.home;
+        return `<tr><td>GW${esc(f.gw)}</td><td>${esc(f.date)}</td><td>${esc(f.ko||'–')}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td>${posOf(opp)?ordn(posOf(opp)):'–'}</td><td>${esc(f.status||'')}</td></tr>`; }).join("");
+      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel(`Results · ${R.length} played`,`<div class="fm-scroll"><table><tr><th>GW</th><th>Date</th><th class="l">Opponent</th><th>H/A</th><th>Score</th><th></th><th>xG (us - them)</th><th></th></tr>${rr}</table></div>`)}
+        ${fmPanel(`Remaining fixtures · ${F.length}`,`<div class="fm-scroll"><table><tr><th>GW</th><th>Date</th><th>KO (UK)</th><th class="l">Opponent</th><th>H/A</th><th>Opp. position</th><th></th></tr>${fr}</table></div>`,'Kick-off times are FPL placeholders (often Sat 15:00) until the TV picks are made.')}</div></div>`;
+    }
+    if(tab==="injuries"){
+      const st=p=>/injured/i.test(p.status)?"Injured":/suspended/i.test(p.status)?"Suspended":/unavailable/i.test(p.status)?"Unavailable":"Doubt";
+      const tr=inj.map(p=>`<tr class="${isOut(p)?'out':''}"><td>${av(p)}</td><td><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span></td><td class="nm">${esc(p.name)}</td><td>${st(p)}</td><td>${p.chance!=null?p.chance+'%':'–'}</td><td class="nm" style="font-weight:400">${esc(p.news||'–')}</td><td>${p.apps??0}</td><td class="b">${fmtVal(p.id)}</td></tr>`).join("");
+      return `<div class="fm-wrap"><div class="fm-main">${fmPanel(`Injuries &amp; doubts · ${inj.length} players`,inj.length?`<div class="fm-scroll"><table><tr><th></th><th>Pos</th><th class="l">Player</th><th>Status</th><th>Chance of playing</th><th class="l">News</th><th>Apps</th><th>Value</th></tr>${tr}</table></div>`:'<div class="muted">No injuries or doubts reported</div>',
+        'Source: FPL player news and chance-of-playing via the Squads tab. "Doubt" = FPL gives a chance of playing below 100%.')}</div>
+        <div class="fm-side">${fmPanel("Summary",fmKV([["Injured",inj.filter(p=>/injured/i.test(p.status)).length],["Suspended",inj.filter(p=>/suspended/i.test(p.status)).length],["Unavailable (other)",inj.filter(p=>/unavailable/i.test(p.status)).length],["Doubtful",inj.filter(p=>!isOut(p)).length],["Fit",S.length-inj.length]]))}</div></div>`;
+    }
+    if(tab==="stats"){
+      const L=D.teams||[];
+      const teamKV=fmKV([["Goals for",d0(TS.GF)+fmRank(L,"GF",TS.GF)],["Expected goals (xG)",f2(TS.xG)+fmRank(L,"xG",TS.xG)],["Goals minus xG",(TS.diff>0?'+':'')+f2(TS.diff)+fmRank(L,"diff",TS.diff)],
+        ["Goals against",d0(TS.GA)+fmRank(L,"GA",TS.GA,true)],["Expected goals against (xGA)",f2(TS.xGA)+fmRank(L,"xGA",TS.xGA,true)],["Clean sheets",d0(TS.cs)+fmRank(L,"cs",TS.cs)],["Yellow cards",d0(TS.yc)],["Red cards",d0(TS.rc)]]);
+      const per90=p=>p.min>=270?p:null;
+      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel("Team stats · league rank in brackets",teamKV,"Source: Team Stats tab (FPL). Team xG is the sum of its players' xG; xGA is the opponents' xG.")}
+        <div class="fm-grid">${fmBoard("Goals",S,"g")}${fmBoard("Assists",S,"a")}${fmBoard("Expected goals (xG)",S,"xg",p=>p.xg.toFixed(2))}${fmBoard("Expected assists (xA)",S,"xa",p=>p.xa.toFixed(2))}
+        ${fmBoard("Minutes",S,"min")}${fmBoard("FPL points",S,"tot")}${fmBoard("Clean sheets (GK/DEF)",S.filter(p=>p.pos==="GK"||p.pos==="DEF"),"cs")}${fmBoard("Goal involvements per 90 (270+ mins)",S.map(p=>({...p,gi90:p.min>=270?(p.g+p.a)*90/p.min:null})),"gi90",p=>p.gi90.toFixed(2))}</div></div></div>`;
+    }
+    return "";
+  }
+  const d0=v=>v==null?'–':v;
   box.style.setProperty("--clubc",pc);
   box.innerHTML=`<div class="fm">
   <div class="fm-top" style="background:linear-gradient(90deg,${shade(pc,-.25)},${pc} 60%,${shade(pc,-.3)});color:${tc};border-bottom-color:${sc}">
@@ -554,8 +652,8 @@ function renderSquad(){
     <div><div class="fm-club">${esc(team)}</div><div class="fm-sub">Premier League 2026/27 · Squad overview · after gameweek ${maxGw}</div></div>
     <div class="fm-hs"><div><b>${ordn(T.pos)}</b><span>Position</span></div><div><b>${T.pts??"--"}</b><span>Points</span></div><div><b>${T.W??0}-${T.D??0}-${T.L??0}</b><span>W-D-L</span></div>
       <div><b>${T.GF??0}:${T.GA??0}</b><span>Goals</span></div><div><b style="font-size:15px;padding-top:4px">${(T.form||[]).map(x=>`<span class="wdl ${esc(x)}">${esc(x)}</span>`).join(" ")||"--"}</b><span>Last 5</span></div></div></div>
-  <div class="fm-tabs"><div class="fm-tab">Overview</div><div class="fm-tab on">Squad</div><div class="fm-tab">Tactics</div><div class="fm-tab">Fixtures</div><div class="fm-tab">Injuries</div><div class="fm-tab">Stats</div></div>
-  <div class="fm-wrap"><div class="fm-main"><div class="fm-panel"><div class="fm-ph">First-team squad · ${S.length} players</div><div class="fm-scroll">
+  ${tabBar("squads")}
+  ${tab!=="squad"?plBody():`<div class="fm-wrap"><div class="fm-main"><div class="fm-panel"><div class="fm-ph">First-team squad · ${S.length} players</div><div class="fm-scroll">
     <table><tr><th></th><th>Pos</th><th class="l">Name</th><th>Age</th><th>Apps / Sts</th><th>Mins</th><th>Gls</th><th>Ast</th><th>xG</th><th>xA</th><th>CS</th><th>ATT*</th><th>CRE*</th><th>DEF*</th><th>Last 5 (FPL pts)</th><th>Avg pts</th><th>Tot</th><th>Value</th></tr>${trs}</table></div>
     <div class="key"><span><span class="av ok">●</span>Available</span><span><span class="av dbt">!</span>Doubt</span><span><span class="av inj">✚</span>Injured / unavailable</span><span><span class="av sus">S</span>Suspended</span>
       <span><span class="pip g">6</span>6+ pts</span><span><span class="pip l">3</span>3-5</span><span><span class="pip a">1</span>1-2</span><span><span class="pip r">0</span>0 or less</span><span><span class="pip dnp"></span>Did not play</span>
@@ -565,7 +663,7 @@ function renderSquad(){
     <div class="fm-panel"><div class="fm-ph">Injuries &amp; doubts</div><div class="fm-pb">${injh}</div></div>
     <div class="fm-panel"><div class="fm-ph">Team form · last 5</div><div class="fm-pb">${formh}</div></div>
     <div class="fm-panel"><div class="fm-ph">Next 3 fixtures</div><div class="fm-pb">${nxh}</div></div>
-  </div></div>
+  </div></div>`}
   <div class="fm-foot">Stats: official FPL API via your Google Sheet${D.lastUpdated?' (updated '+esc(D.lastUpdated)+')':''}. Apps = league games with minutes; players sold or loaned out are not shown.${prov?' * Result awaiting final FPL confirmation.':''}
    Values: Transfermarkt market-value estimates${D.valMeta.checked?' (checked '+esc(D.valMeta.checked)+')':''}${D.valMeta.rate?', converted from € at '+esc(D.valMeta.rate):''}; ${covered} of ${S.length} players have a value, '–' = no Transfermarkt figure. Styled after Football Manager; not affiliated.</div></div>`;
 }
@@ -574,9 +672,10 @@ function setView(v){
   ["squads","leagues","spfl"].forEach(k=>document.body.classList.toggle("v-"+k, v===k));
   ["overview","squads","leagues","spfl"].forEach(k=>$("vb-"+k).classList.toggle("on", v===k));
   try{ localStorage.setItem("foot-term-view", v); }catch(e){}
+  if(v==="squads"||v==="spfl") fmHash(v); else if(location.hash && !location.hash.startsWith("#"+v)) try{ history.replaceState(null,"","#"+v); }catch(e){}
   if(v==="squads") renderSquad(); else if(v==="leagues") renderLeagues(); else if(v==="spfl") renderSpfl(); else Object.values(charts).forEach(c=>{ try{c.resize();}catch(e){} });
 }
-function pickTeam(){ try{ localStorage.setItem("foot-term-team",$("teampick").value); }catch(e){} renderSquad(); }
+function pickTeam(){ try{ localStorage.setItem("foot-term-team",$("teampick").value); }catch(e){} fmHash("squads"); renderSquad(); }
 
 
 /* ---------- SCOTLAND view (Scottish Premiership squads: ESPN + Transfermarkt, via the SPFL tab) ---------- */
@@ -602,12 +701,12 @@ function extractSpfl(t, D){
 }
 function fillSpflPicker(D){
   const sel=$("spflpick"); if(!sel||!D.spfl) return; const clubs=D.spfl.order; if(!clubs.length) return;
-  const m=location.hash.match(/^#(?:spfl|scotland)\/(.+)$/);
+  const m=location.hash.match(/^#(?:spfl|scotland)\/([^\/]+)/);
   const want = sel.value || (m?decodeURIComponent(m[1]):null) || localStorage.getItem("foot-term-spfl") || "Celtic";
   sel.innerHTML = clubs.map(t=>`<option${t===want?" selected":""}>${esc(t)}</option>`).join("");
   if(!clubs.includes(want) && clubs.includes("Celtic")) sel.value="Celtic";
 }
-function pickSpfl(){ try{ localStorage.setItem("foot-term-spfl",$("spflpick").value); }catch(e){} renderSpfl(); }
+function pickSpfl(){ try{ localStorage.setItem("foot-term-spfl",$("spflpick").value); }catch(e){} fmHash("spfl"); renderSpfl(); }
 function renderSpfl(){
   const D=LAST_D, box=$("spflpage"); if(!D||!box) return;
   const S=D.spfl||{clubs:{},order:[]};
@@ -646,6 +745,54 @@ function renderSpfl(){
     return `<div class="fx"><div class="fxd">${esc(f.date)} UK</div><div class="fxo">${esc(f.opp)} <span class="ha ${home?"H":"A"}">${home?"HOME":"AWAY"}</span><span class="fxp">${posOf(f.oppId)?ordn(posOf(f.oppId))+' in table':''}</span></div></div>`; }).join("")||'<div class="muted">No fixtures listed</div>';
   const form=(T.form&&T.form.length)?T.form:res.slice().reverse().map(r=>{ const [a,b]=(r.score||"").split("-").map(Number); return a>b?"W":a===b?"D":"L"; });
   const covered=c.players.filter(p=>p.val!=null).length, nostats=c.players.filter(p=>p.apps==null).length;
+  const tab=FM_TAB.spfl;
+  const sum=(L,k)=>L.reduce((t,p)=>t+(p[k]||0),0);
+  const clubTot=Object.values(S.clubs).map(x=>{ const r=lg.rows.find(y=>String(y.id)===String(x.id))||{};
+    return {name:x.name,GF:r.GF,GA:r.GA,sh:sum(x.players,"sh"),sot:sum(x.players,"sot"),yc:sum(x.players,"yc"),rc:sum(x.players,"rc"),sv:sum(x.players,"sv")}; });
+  const me=clubTot.find(x=>x.name===team)||{};
+  const noXg='There is no xG, minutes or clean-sheet data for Scotland in the sheet (no free FPL-style feed exists), so this tab uses goals, shots and cards only.';
+  function spBody(){
+    const side=`<div class="fm-side">${fmPanel("Top performers",`<div class="sh">Goals</div>${top("g",p=>`${p.g} <small>(${d(p.sh)} shots)</small>`)}<div class="sh">Assists</div>${top("a",p=>`${p.a}`)}<div class="sh">Shots on target</div>${top("sot",p=>`${p.sot} <small>of ${d(p.sh)}</small>`)}`)}</div>`;
+    if(tab==="overview"){
+      const used=c.players.filter(p=>(p.apps||0)>0).length, ts=[...c.players].filter(p=>p.g).sort((a,b)=>b.g-a.g||(b.a||0)-(a.a||0))[0];
+      const summ=T.pos?`${esc(team)} are <b>${ordn(T.pos)}</b> on <b>${T.pts}</b> points after ${T.P} games (${T.W} won, ${T.D} drawn, ${T.L} lost), scoring ${T.GF} and conceding ${T.GA}.`+
+        ` Their players have taken <b>${me.sh}</b> shots, ${me.sot} on target${me.sh?` (${Math.round(100*me.sot/me.sh)}%)`:''}.`+(ts?` Top scorer: <b>${esc(ts.name)}</b> (${ts.g}).`:'')+` ${used} players have featured; ${inj.length} currently injured or suspended.`:'No table data yet.';
+      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel("Season so far",`<div class="summ">${summ}</div>`+fmKV([["Position",T.pos?ordn(T.pos):'–'],["Points",`${d(T.pts)} <small>(${T.P?(T.pts/T.P).toFixed(2):'–'} a game)</small>`],
+        ["Goals for / against",`${d(T.GF)} / ${d(T.GA)}`],["Shots / on target",`${me.sh} / ${me.sot}`],["Yellow / red cards",`${me.yc} / ${me.rc}`],["Players used",used]]),noXg)}
+        <div class="fm-grid">${fmPanel("Team form · last 5",formh)}${fmPanel("Next 3 fixtures",nxh)}</div></div>${side}</div>`;
+    }
+    if(tab==="tactics"){
+      const {xi,next}=mostUsedXI(c.players);
+      if(xi.length<11) return `<div class="fm-wrap"><div class="fm-main">${fmPanel("Most-used XI from starts",'<div class="muted">Not enough starts yet to build an XI.</div>')}</div></div>`;
+      const P=pitchHtml(xi);
+      const li=L=>L.map(p=>`<div class="lb"><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span><span class="n">${esc(p.name)}</span><span class="v">${p.starts}</span></div>`).join("")||'<div class="muted">–</div>';
+      return `<div class="fm-wrap"><div class="fm-main">${fmPanel(`Most-used XI from starts · ${P.shape}`,P.html,
+        `The 11 players with the most league starts (the top goalkeeper plus the top 10 outfield players), placed by their ESPN position. ${P.shape} is just how those positions split. It's not a real formation or a real line-up. Starts = appearances minus sub appearances (ESPN). Ties are broken by appearances.`)}</div>
+        <div class="fm-side">${fmPanel("XI · league starts",li(xi))}${fmPanel("Next most starts",li(next))}</div></div>`;
+    }
+    if(tab==="fixtures"){
+      const rr=[...c.results].reverse().map(r=>{ const [x,y]=(r.score||"").split("-").map(Number); const o=x>y?"W":x===y?"D":"L";
+        return `<tr><td>${esc(r.date)}</td><td class="nm">${esc(r.opp)}</td><td><span class="ha ${r.ha==='H'?'H':'A'}">${esc(r.ha)}</span></td><td class="b">${esc(r.score)}</td><td><span class="wdl ${o}">${o}</span></td><td>${posOf(r.oppId)?ordn(posOf(r.oppId)):'–'}</td></tr>`; }).join("");
+      const fr=c.fixtures.map(f=>`<tr><td>${esc(f.date)}</td><td class="nm">${esc(f.opp)}</td><td><span class="ha ${f.ha==='H'?'H':'A'}">${esc(f.ha)}</span></td><td>${posOf(f.oppId)?ordn(posOf(f.oppId)):'–'}</td></tr>`).join("");
+      const lim='The SPFL tab only keeps each club\'s last 5 league results and next 3 league fixtures (to keep the sheet lean), so older results and later fixtures aren\'t shown here.';
+      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel(`Latest results · ${c.results.length} of ${d(T.P)} played`,`<div class="fm-scroll"><table><tr><th>Date</th><th class="l">Opponent</th><th>H/A</th><th>Score</th><th></th><th>Opp. position</th></tr>${rr}</table></div>`,lim)}
+        ${fmPanel(`Next fixtures · ${c.fixtures.length}`,`<div class="fm-scroll"><table><tr><th>Date · KO (UK)</th><th class="l">Opponent</th><th>H/A</th><th>Opp. position</th></tr>${fr}</table></div>`)}</div></div>`;
+    }
+    if(tab==="injuries"){
+      const tr=inj.map(p=>`<tr class="out"><td>${av(p)}</td><td><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span></td><td class="nm">${esc(p.name)}</td><td>${esc(p.status)}</td><td class="nm" style="font-weight:400">${esc(p.abs||'–')}</td><td>${esc(p.since||'–')}</td><td>${esc(p.until||'unknown')}</td><td>${p.apps??'–'}</td><td class="b">${fmtVal(p.val)}</td></tr>`).join("");
+      return `<div class="fm-wrap"><div class="fm-main">${fmPanel(`Injuries &amp; suspensions · ${inj.length} players`,inj.length?`<div class="fm-scroll"><table><tr><th></th><th>Pos</th><th class="l">Player</th><th>Status</th><th class="l">Reason</th><th>Since</th><th>Expected back</th><th>Apps</th><th>Value</th></tr>${tr}</table></div>`:(c.meta.inj?'<div class="muted">No injuries or suspensions listed</div>':'<div class="muted">Injury list not available</div>'),
+        `Source: Transfermarkt injury and suspension list${c.meta.inj?' (checked '+esc(c.meta.inj)+')':''}. Transfermarkt has no "doubtful" or chance-of-playing figures, so only confirmed absences are listed.`)}</div>
+        <div class="fm-side">${fmPanel("Summary",fmKV([["Injured",inj.filter(p=>/injured/i.test(p.status)).length],["Suspended",inj.filter(p=>/suspended/i.test(p.status)).length],["Other absence",inj.filter(p=>!/injured|suspended/i.test(p.status)).length],["Available",c.players.length-inj.length]]))}</div></div>`;
+    }
+    if(tab==="stats"){
+      const teamKV=fmKV([["Goals for",d(T.GF)+fmRank(clubTot,"GF",T.GF)],["Goals against",d(T.GA)+fmRank(clubTot,"GA",T.GA,true)],["Shots",me.sh+fmRank(clubTot,"sh",me.sh)],["Shots on target",me.sot+fmRank(clubTot,"sot",me.sot)],
+        ["Shot accuracy",me.sh?Math.round(100*me.sot/me.sh)+'%':'–'],["Goals per shot",me.sh&&T.GF!=null?(T.GF/me.sh).toFixed(2):'–'],["Goalkeeper saves",me.sv+fmRank(clubTot,"sv",me.sv)],["Yellow / red cards",`${me.yc} / ${me.rc}`]]);
+      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel("Team stats · league rank in brackets",teamKV,"Shots, cards and saves are the sum of this club's players' league stats (ESPN). "+noXg)}
+        <div class="fm-grid">${fmBoard("Goals",c.players,"g")}${fmBoard("Assists",c.players,"a")}${fmBoard("Shots",c.players,"sh")}${fmBoard("Shots on target",c.players,"sot")}
+        ${fmBoard("Appearances",c.players,"apps",p=>`${p.apps} <small style="color:#8d98ad">(${d(p.starts)} starts)</small>`)}${fmBoard("Goal involvements",c.players.map(p=>({...p,gi:(p.g||0)+(p.a||0)})),"gi")}${fmBoard("Yellow cards",c.players,"yc")}${fmBoard("Saves (GK)",c.players.filter(p=>p.pos==="GK"),"sv")}</div></div></div>`;
+    }
+    return "";
+  }
   box.style.setProperty("--clubc",pc);
   box.innerHTML=`<div class="fm">
   <div class="fm-top" style="background:linear-gradient(90deg,${shade(pc,-.25)},${pc} 60%,${shade(pc,-.3)});color:${tc};border-bottom-color:${sc}">
@@ -653,8 +800,8 @@ function renderSpfl(){
     <div><div class="fm-club">${esc(team)}</div><div class="fm-sub">Scottish Premiership 2026/27 · Squad overview${T.P!=null?' · after '+T.P+' games':''}</div></div>
     <div class="fm-hs"><div><b>${T.pos?ordn(T.pos):'–'}</b><span>Position</span></div><div><b>${d(T.pts)}</b><span>Points</span></div><div><b>${T.W!=null?T.W+'-'+T.D+'-'+T.L:'–'}</b><span>W-D-L</span></div>
       <div><b>${T.GF!=null?T.GF+':'+T.GA:'–'}</b><span>Goals</span></div><div><b style="font-size:15px;padding-top:4px">${form.slice(-5).map(x=>`<span class="wdl ${esc(x)}">${esc(x)}</span>`).join(" ")||"–"}</b><span>Last 5</span></div></div></div>
-  <div class="fm-tabs"><div class="fm-tab">Overview</div><div class="fm-tab on">Squad</div><div class="fm-tab">Fixtures</div><div class="fm-tab">Injuries</div></div>
-  <div class="fm-wrap"><div class="fm-main"><div class="fm-panel"><div class="fm-ph">First-team squad · ${c.players.length} players</div><div class="fm-scroll">
+  ${tabBar("spfl")}
+  ${tab!=="squad"?spBody():`<div class="fm-wrap"><div class="fm-main"><div class="fm-panel"><div class="fm-ph">First-team squad · ${c.players.length} players</div><div class="fm-scroll">
     <table><tr><th></th><th>Pos</th><th>No</th><th class="l">Name</th><th>Age</th><th>Apps / Sts</th><th>Gls</th><th>Ast</th><th>Shots</th><th>On tgt</th><th>YC</th><th>RC</th><th>Saves</th><th>Conc</th><th>Value</th></tr>${trs}</table></div>
     <div class="key"><span><span class="av ok">●</span>Available</span><span><span class="av inj">✚</span>Injured</span><span><span class="av sus">S</span>Suspended</span><span><span class="av dbt">!</span>Other absence</span><span>– = no data (no league minutes yet, or no Transfermarkt figure)</span></div></div></div>
   <div class="fm-side">
@@ -662,7 +809,7 @@ function renderSpfl(){
     <div class="fm-panel"><div class="fm-ph">Injuries &amp; suspensions</div><div class="fm-pb">${injh}</div></div>
     <div class="fm-panel"><div class="fm-ph">Team form · last 5</div><div class="fm-pb">${formh}</div></div>
     <div class="fm-panel"><div class="fm-ph">Next 3 fixtures</div><div class="fm-pb">${nxh}</div></div>
-  </div></div>
+  </div></div>`}
   <div class="fm-foot">Squads, league stats, results and fixtures: ESPN's public Scottish Premiership feed${c.meta.espn?' (checked '+esc(c.meta.espn)+')':''}; table from the Leagues tab. League games only (no cups or Europe).
    There's no FPL for Scotland, so there are no minutes, xG/xA, clean sheets, form points or ratings here. Injuries and suspensions: Transfermarkt${c.meta.inj?' (checked '+esc(c.meta.inj)+')':''}; anyone not on that list is shown as available. Values: Transfermarkt estimates${c.meta.val?' (checked '+esc(c.meta.val)+')':''}${c.meta.rate?', converted from € at '+esc(c.meta.rate):''}; ${covered} of ${c.players.length} players have a value.
    ${nostats?nostats+' player'+(nostats>1?'s have':' has')+' no league stats yet (–).':''} Styled after Football Manager; not affiliated.</div></div>`;
