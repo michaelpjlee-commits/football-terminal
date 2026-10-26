@@ -272,6 +272,102 @@ body.v-managers #view-managers{display:block}
   .fm-tabs{padding:0 6px}.fm-tab{padding:8px 10px}
 }
 .mr-link{color:#1de9a0;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-decoration:none;border:1px solid #1de9a0;border-radius:3px;padding:1px 6px;box-shadow:0 0 8px rgba(29,233,160,.35);white-space:nowrap}.mr-link:hover{background:rgba(29,233,160,.15)}
+/* Liverpool terminal extras */
+.lxcol{display:flex;flex-direction:column;gap:12px}
+.lx{background:#050a0a;border:1px solid rgba(29,233,160,.45);border-radius:8px;box-shadow:0 0 18px rgba(29,233,160,.08),inset 0 0 30px rgba(29,233,160,.03);color:#d6ffe9;font-family:var(--mono);overflow:hidden;min-width:0}
+.lxh{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(29,233,160,.25);background:linear-gradient(90deg,rgba(29,233,160,.08),transparent)}
+.lxh h3{margin:0;font-size:12.5px;letter-spacing:.12em;color:#1de9a0;text-shadow:0 0 8px rgba(29,233,160,.6);font-weight:600}
+.lxtag{font-size:10px;letter-spacing:.1em;color:#1de9a0;border:1px solid #1de9a0;border-radius:3px;padding:1px 6px;white-space:nowrap}
+.lxb{padding:10px 14px}
+.lxnote{color:#7fa89a;font-size:11px;line-height:1.45;margin-top:8px;font-family:"Segoe UI","Inter",Roboto,Arial,sans-serif}
+.lxdim{color:#9fcfba;font-size:12px;line-height:1.5}.lxdim2{color:#9fcfba;font-size:13px}
+.lxcur,.lxcur2::after{animation:lxb 1s steps(1) infinite}
+.lxcur2::after{content:"";display:inline-block;width:10px;height:18px;background:#1de9a0;vertical-align:-3px;margin-left:6px}
+@keyframes lxb{50%{opacity:0}}
+.lxgrid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:12px}
+.lxsel{background:#071211;color:#d6ffe9;border:1px solid rgba(29,233,160,.5);border-radius:4px;font-family:var(--mono);font-size:12px;padding:4px 6px;max-width:100%}
+.lxctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.lxtgs{display:flex;gap:4px}.lxtg{cursor:pointer;font-size:11px;border:1px solid rgba(29,233,160,.4);padding:2px 8px;border-radius:3px;color:#9fcfba}.lxtg.on{background:#1de9a0;color:#03110c}
+.lxk{color:#1de9a0;font-size:11px;letter-spacing:.14em;margin:10px 0 4px}
+.lxbtn{display:block;text-align:center;color:#1de9a0;text-decoration:none;font-family:var(--mono);font-size:13px;letter-spacing:.1em;border:1px solid #1de9a0;border-radius:6px;padding:10px;background:#050a0a;box-shadow:0 0 14px rgba(29,233,160,.25)}
+.lxbtn:hover{background:#0a1a16}
+/* ticker */
+.lxtick{display:flex;align-items:center;gap:0;background:#050a0a;border-bottom:1px solid rgba(29,233,160,.35);font-family:var(--mono);font-size:12px;color:#d6ffe9;overflow:hidden}
+.lxtl{background:#1de9a0;color:#03110c;padding:6px 10px;font-weight:700;letter-spacing:.1em;flex:none}
+.lxtw{overflow:hidden;flex:1;min-width:0}
+.lxtr{display:inline-flex;white-space:nowrap;animation:lxscroll 60s linear infinite}
+.lxtw:hover .lxtr{animation-play-state:paused}
+.lxtr .li{padding:6px 18px;border-right:1px solid rgba(29,233,160,.15)}.lxtr .lk{color:#1de9a0;margin-right:6px}.lxtr b{color:#fff;text-shadow:0 0 8px rgba(255,255,255,.5)}
+@keyframes lxscroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.lxmg{flex:none;color:#ffd23f;text-decoration:none;padding:6px 10px;border-left:1px solid rgba(29,233,160,.35);letter-spacing:.08em;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.lxtr{animation:none}}
+/* heat strip */
+.hxrow{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap}
+.hx{flex:1 1 90px;min-width:90px;border:1px solid var(--hc);background:linear-gradient(180deg,color-mix(in srgb,var(--hc) 18%,transparent),transparent);border-radius:4px;padding:7px 8px;box-shadow:0 0 10px color-mix(in srgb,var(--hc) 30%,transparent)}
+.hxt{font-size:14px;font-weight:700;color:#fff}.hxt span{color:var(--hc);margin-right:2px}
+.hxs{font-size:10.5px;color:#9fcfba;margin:2px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hxbar{height:7px;background:#0d1a18}.hxbar i{display:block;height:100%;background:var(--hc);box-shadow:0 0 8px var(--hc)}
+.hxd{font-size:10px;color:#7fa89a;margin-top:5px}
+.hxavg{flex:0 0 64px;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:10px;color:#9fcfba;letter-spacing:.1em}.hxavg b{font-size:20px;color:#fff}
+/* luck */
+.lxluck{display:flex;align-items:center;gap:18px;flex-wrap:wrap}.lxg{width:240px;max-width:100%}
+.lxlk{display:flex;flex-direction:column;gap:4px}.lxln{font-size:13px;letter-spacing:.14em;color:#d6ffe9}
+.lxlv{font-size:34px;font-weight:700;line-height:1.05;margin-top:2px}
+.lxls{font-size:12px;color:#9fcfba}.lxlb{font-size:12px;letter-spacing:.14em;font-weight:700}
+/* path */
+.pcrow{display:flex;align-items:center;overflow-x:auto;padding:4px 2px 8px}
+.pc{flex:none;width:74px;border:1px solid;border-radius:5px;padding:5px 4px;text-align:center;text-decoration:none;color:#d6ffe9;background:#060c0c}
+.pc.W{border-color:#1de9a0;box-shadow:0 0 10px rgba(29,233,160,.35)}.pc.D{border-color:#ffd23f;box-shadow:0 0 10px rgba(255,210,63,.25)}.pc.L{border-color:#ff3b5c;box-shadow:0 0 10px rgba(255,59,92,.3)}
+.pcl{flex:1 0 10px;min-width:10px;height:2px;background:linear-gradient(90deg,rgba(29,233,160,.6),rgba(29,233,160,.2))}
+.pcg{font-size:9.5px;color:#7fa89a}.pcr{font-size:18px;font-weight:700}.pc.W .pcr{color:#1de9a0}.pc.D .pcr{color:#ffd23f}.pc.L .pcr{color:#ff3b5c}
+.pcs{font-size:13px;color:#fff}.pco{font-size:10.5px;color:#9fcfba}.pcp{font-size:9.5px;color:#7fa89a;margin-top:2px}
+.pcm{font-size:9px;color:#03110c;background:#1de9a0;border-radius:2px;margin-top:4px;letter-spacing:.06em}
+a.pc:hover{background:#0b1d18}
+/* lineup */
+.lxhd{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid rgba(29,233,160,.25)}
+.lxp{font-size:17px;letter-spacing:.16em;color:#1de9a0;text-shadow:0 0 8px rgba(29,233,160,.6)}.lxhd .lxsel{margin-left:auto}
+.lxlug{display:flex;gap:14px;padding:12px 14px;flex-wrap:wrap}
+.lxpitch{flex:1 1 520px;min-width:0}.lxsvg{width:100%;height:auto;display:block;font-family:var(--mono)}
+.lxside{flex:0 1 270px;border:1px solid rgba(29,233,160,.45);border-radius:4px;padding:12px;background:#060c0c;box-shadow:0 0 14px rgba(29,233,160,.12)}
+.lxft{font-size:22px;color:#fff;font-weight:700;letter-spacing:.06em}.lxft .wdl{font-size:11px;vertical-align:4px}
+.lxsu{font-size:12.5px;line-height:1.6}
+.lxlu .lxnote{padding:0 14px 12px}
+/* scanner */
+.sc{display:grid;grid-template-columns:44px minmax(90px,150px) 1fr 38px;align-items:center;gap:8px;padding:3px 0}
+.scp{font-size:10.5px;color:#7fa89a}.scn{font-size:12.5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scn .star{color:#ffd23f}
+.scs{display:grid;grid-template-columns:repeat(20,1fr);gap:2px}.scs i{height:14px;background:#0d1716;border-radius:1px}
+.scs i.on{background:var(--c);box-shadow:0 0 6px var(--c)}
+.scv{text-align:right;color:var(--c);font-weight:700;font-size:14px}
+.scf{margin-top:8px;border-top:1px solid rgba(29,233,160,.3);padding-top:4px;font-size:10.5px;color:#1de9a0;letter-spacing:.1em}
+/* style */
+.stg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.st{border:1px solid rgba(29,233,160,.3);border-radius:4px;padding:7px 9px;background:#060c0c}
+.stl{font-size:10.5px;color:#9fcfba;letter-spacing:.04em}.stv{font-size:21px;font-weight:700;color:#fff;margin-top:2px}.stv small{font-size:11px;color:#9fcfba;margin-left:2px}
+.str{font-size:10.5px;color:#1de9a0}
+.lxrad{position:relative;height:340px}.lxline{height:240px;margin-top:10px}
+.sim{display:grid;grid-template-columns:minmax(110px,150px) 1fr 44px;gap:10px;align-items:center;padding:6px 0;font-size:13px}
+.sim .simb{height:10px;background:#0d1716}.sim .simb i{display:block;height:100%;background:#3d9bff;box-shadow:0 0 8px #3d9bff}
+.sim.on .simn{color:#fff;text-shadow:0 0 8px #3d9bff}.simv{text-align:right;color:#fff}
+.lx table.kv tr{background:transparent!important}.lx table.kv td{background:transparent!important;color:#d6ffe9;border-bottom:1px solid rgba(29,233,160,.12);padding:4px 2px;font-size:12px}.lx table.kv td.l{color:#9fcfba}
+.lgd{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:#9fcfba;margin-top:8px}
+.lxkv{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;margin-top:6px}
+table.lxt{width:100%;border-collapse:collapse;font-size:12px}table.lxt th{color:#1de9a0;font-weight:500;text-align:center;padding:4px;border-bottom:1px solid rgba(29,233,160,.3)}
+table.lxt td{text-align:center;padding:4px;border-bottom:1px solid rgba(29,233,160,.1);color:#d6ffe9}table.lxt .l{text-align:left}table.lxt .b{color:#fff;font-weight:700}
+/* managers */
+.mduel{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;margin-top:6px}
+.mnm{font-size:15px;font-weight:700;letter-spacing:.08em}.mvs{align-self:center;color:#ffd23f;font-size:18px;font-weight:700;text-shadow:0 0 10px #ffd23f}
+.mvs2{color:#ffd23f;font-weight:700}
+.mrec{border-left:3px solid var(--c);padding:4px 8px;margin:6px 0;font-size:12px;line-height:1.6;color:#d6ffe9;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 10%,transparent),transparent)}
+.mbig{font-size:26px;font-weight:700;color:#fff;text-shadow:0 0 10px var(--c)}.mbig small{font-size:11px;color:#9fcfba;margin-left:4px}
+.mrec .pos{color:#1de9a0}.mrec .neg{color:#ff3b5c}
+.mmeet{font-size:13px}.mmeet .pos{color:#ff3b5c}.mmeet .neg{color:#3d9bff}
+.mchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.mc{border:1px solid;border-radius:3px;padding:2px 6px;font-size:12px;text-align:center}.mc small{display:block;font-size:9px;color:#7fa89a}
+.mc.W{border-color:#1de9a0;color:#1de9a0}.mc.D{border-color:#ffd23f;color:#ffd23f}.mc.L{border-color:#ff3b5c;color:#ff3b5c}
+.lx .fr{display:flex;gap:10px;align-items:center;font-size:12px;padding:3px 0}.lx .fr .frs{margin-left:auto;color:#fff;font-weight:700}
+@media (max-width:640px){.mduel{grid-template-columns:1fr}.mvs{justify-self:center}.sc{grid-template-columns:34px 92px 1fr 32px}.lxp{font-size:14px}.lxrad{height:300px}}
+.fm-main.lxcol{width:100%;align-self:stretch;min-width:0}
+.lxnarrow{display:none}
+@media (max-width:700px){.lxwide{display:none}.lxnarrow{display:block;max-width:420px;margin:0 auto}.lxluck{justify-content:center}.lxg{width:200px}.lxlv{font-size:28px}}
 </style>
 <style>
 #tf-card .tfmeta{font-family:var(--mono);font-size:11px;color:var(--dim)}
@@ -598,15 +694,318 @@ function render(D, fetchedAt, stale){
 
 /* ---------- match reports (gw|home|away -> page) ---------- */
 const MATCH_REPORTS={"8|Liverpool|Brighton":"reports/2026-10-25-liverpool-v-brighton.html"};
+/* ===== LIVERPOOL CLUB PAGE · terminal extras (Liverpool only for now) ===== */
+const LFC_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["style","Style"],["shots","Shots"],["managers","Managers"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+function fmTabsFor(view){ try{ if(view==="squads" && (($("teampick")&&$("teampick").value)||"Liverpool")==="Liverpool") return LFC_TABS; }catch(e){} return FM_TABS; }
+let LFCX=null, LFCH=null, LFCX_ERR=false, LFCX_BUSY=false;
+const LX={m:null, shotSide:"both", cur:"Man City", atA:null, atB:null};
+const LXC={red:"#ff3b5c", liv:"#ff3b5c", opp:"#3d9bff", g:"#1de9a0", y:"#ffd23f", t:"#d6ffe9", m:"#9fcfba", bg:"#050a0a"};
+function lfcLoad(){
+  if(LFCX_BUSY||(LFCX&&LFCH)) return; LFCX_BUSY=true;
+  const j=u=>fetch(u,{cache:"no-store"}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); });
+  Promise.all([j("data/lfc-extras.json"),j("data/managers-h2h.json")]).then(([a,b])=>{ LFCX=a; LFCH=b; LFCX_ERR=false; })
+   .catch(e=>{ console.warn("extras",e); LFCX_ERR=true; })
+   .finally(()=>{ LFCX_BUSY=false; if(document.body.classList.contains("v-squads") && $("teampick") && $("teampick").value==="Liverpool") renderSquad(); });
+}
+const lxCode=t=>(CLUBS[t]||[String(t).slice(0,3).toUpperCase()])[0];
+const lxPanel=(title,body,tag,cls)=>`<section class="lx ${cls||''}"><div class="lxh"><h3>&gt; ${title}</h3>${tag?`<span class="lxtag">${tag}</span>`:''}</div><div class="lxb">${body}</div></section>`;
+const lxWait=()=>LFCX_ERR?'<div class="lxnote">This panel is temporarily unavailable. It will come back on the next refresh.</div>':'<div class="lxnote">Loading<span class="lxcur">_</span></div>';
+const lxD=s=>{ const d=new Date(s+"T12:00:00Z"); return d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"Europe/London"}); };
+const lxDY=s=>{ const d=new Date(s+"T12:00:00Z"); return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"Europe/London"}); };
+const lxMin=m=>m==null?"":(m%1? `${Math.floor(m)}+${Math.round((m%1)*10)}'` : `${m}'`);
+
+/* ---- ticker ---- */
+function lfcTicker(S,T){
+  const top=(k,n,f)=>[...S].filter(p=>(p[k]||0)>0).sort((a,b)=>b[k]-a[k]||b.min-a.min).slice(0,n).map(f);
+  const it=[];
+  if(T&&T.pos) it.push(`<span class="li"><b style="color:${LXC.y}">LIVERPOOL</b> ${ordn(T.pos)} · ${T.pts} PTS · ${T.W}-${T.D}-${T.L}</span>`);
+  top("g",4,p=>it.push(`<span class="li"><span class="lk">GOALS</span> ${esc(p.name.toUpperCase())} <b>${p.g}</b></span>`));
+  top("a",3,p=>it.push(`<span class="li"><span class="lk">ASSISTS</span> ${esc(p.name.toUpperCase())} <b>${p.a}</b></span>`));
+  top("xg",3,p=>it.push(`<span class="li"><span class="lk">xG</span> ${esc(p.name.toUpperCase())} <b>${p.xg.toFixed(2)}</b></span>`));
+  top("xa",2,p=>it.push(`<span class="li"><span class="lk">xA</span> ${esc(p.name.toUpperCase())} <b>${p.xa.toFixed(2)}</b></span>`));
+  top("form",4,p=>it.push(`<span class="li"><span class="lk" style="color:${LXC.y}">▲ IN FORM</span> ${esc(p.name.toUpperCase())} <b>${p.form.toFixed(1)}</b> <small>pts/g</small></span>`));
+  top("min",2,p=>it.push(`<span class="li"><span class="lk">MINUTES</span> ${esc(p.name.toUpperCase())} <b>${p.min}</b></span>`));
+  if(!it.length) return "";
+  return `<div class="lxtick"><span class="lxtl">LFC.FEED</span><div class="lxtw"><div class="lxtr">${it.join("")}${it.join("")}</div></div><a class="lxmg" href="#managers" onclick="setView('managers');return false">★ MANAGERS ↗</a></div>`;
+}
+
+/* ---- fixture heat strip ---- */
+function lfcHeat(D,team){
+  const pos=t=>{const r=D.table.find(x=>x.team===t); return r?r.pos:null;};
+  const F=D.fixtures.filter(f=>(f.home===team||f.away===team)&&!/in play/i.test(f.status)).slice(0,5);
+  if(!F.length) return lxPanel("FIXTURE.HEAT · NEXT 5",'<div class="lxnote">No fixtures listed.</div>');
+  const dif=p=>p==null?3:p<=4?5:p<=8?4:p<=12?3:p<=16?2:1;
+  const col=["","#00ff9c","#7be0a8","#b8b08a","#ff8a7a","#ff3b5c"];
+  let sum=0;
+  const cells=F.map(f=>{ const h=f.home===team, o=h?f.away:f.home, p=pos(o), d=dif(p); sum+=d;
+    return `<div class="hx" style="--hc:${col[d]}" title="Difficulty ${d} of 5"><div class="hxt"><span>${h?"H":"A"}</span> ${esc(lxCode(o))}</div><div class="hxs">${esc(short(o))}${p?` · ${ordn(p)}`:''}</div><div class="hxbar"><i style="width:${d*20}%"></i></div><div class="hxd">GW${esc(f.gw)} · ${esc((f.date||"").replace(/ \d{4}$/,""))}</div></div>`; }).join("");
+  return lxPanel("FIXTURE.HEAT · NEXT 5",`<div class="hxrow">${cells}<div class="hxavg">AVG<b>${(sum/F.length).toFixed(1)}</b></div></div><div class="lxnote">Difficulty 1 (easy) to 5 (hard), from each opponent's current league position: top 4 = 5, 5th-8th = 4, 9th-12th = 3, 13th-16th = 2, bottom 4 = 1. Updates as the table changes.</div>`,"LIVE");
+}
+
+/* ---- luck meter (points v expected points from match xG) ---- */
+function lxPois(l,k){ let p=Math.exp(-l); for(let i=1;i<=k;i++) p*=l/i; return p; }
+function lxXpts(a,b){ let w=0,d=0; for(let i=0;i<=10;i++) for(let j=0;j<=10;j++){ const p=lxPois(a,i)*lxPois(b,j); if(i>j) w+=p; else if(i===j) d+=p; } return 3*w+d; }
+function lxLuckAll(D){
+  const T={};
+  D.results.forEach(r=>{ if(r.hxg==null||r.axg==null) return;
+    [[r.home,r.hg,r.ag,r.hxg,r.axg],[r.away,r.ag,r.hg,r.axg,r.hxg]].forEach(([t,gf,ga,xf,xa])=>{ const o=T[t]||(T[t]={pts:0,x:0,P:0}); o.P++; o.pts+=gf>ga?3:gf===ga?1:0; o.x+=lxXpts(xf,xa); }); });
+  return T;
+}
+function lfcLuck(D,team){
+  const A=lxLuckAll(D), me=A[team]; if(!me) return lxPanel("LUCK.METER",'<div class="lxnote">No games yet.</div>');
+  const diff=me.pts-me.x, rank=1+Object.values(A).filter(o=>(o.pts-o.x)>diff).length, n=Object.keys(A).length;
+  const c=diff>=1.5?LXC.g:diff<=-1.5?LXC.red:LXC.y, lab=diff>=1.5?"RIDING LUCK":diff<=-1.5?"UNLUCKY":"ON TRACK";
+  const cl=Math.max(-8,Math.min(8,diff)), ang=Math.PI*(1-(cl+8)/16), cx=130, cy=118, R=92;
+  const nx=cx+(R-14)*Math.cos(ang), ny=cy-(R-14)*Math.sin(ang);
+  const arc=(a0,a1)=>{ const x0=cx+R*Math.cos(a0), y0=cy-R*Math.sin(a0), x1=cx+R*Math.cos(a1), y1=cy-R*Math.sin(a1); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 ${a0>a1?1:0} ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+  const svg=`<svg viewBox="0 0 260 140" class="lxg"><path d="${arc(Math.PI,0)}" stroke="#1b2a30" stroke-width="16" fill="none"/>
+   <path d="${arc(Math.PI/2,ang)}" stroke="${c}" stroke-width="16" fill="none" style="filter:drop-shadow(0 0 6px ${c})"/>
+   <line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="#e8f4ef" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="6" fill="#e8f4ef"/>
+   <text x="${cx-R}" y="${cy+18}" fill="${LXC.m}" font-size="10" text-anchor="middle">-8</text><text x="${cx+R}" y="${cy+18}" fill="${LXC.m}" font-size="10" text-anchor="middle">+8</text><text x="${cx}" y="${cy-R-8}" fill="${LXC.m}" font-size="10" text-anchor="middle">0</text></svg>`;
+  return lxPanel("LUCK.METER",`<div class="lxluck">${svg}<div class="lxlk"><div class="lxln">LIVERPOOL</div><div class="lxlv" style="color:${c};text-shadow:0 0 12px ${c}">${diff>=0?'+':''}${diff.toFixed(1)}</div>
+    <div class="lxls">PTS ${me.pts} · xPTS ${me.x.toFixed(1)}</div><div class="lxlb" style="color:${c}">${lab}</div><div class="lxls">${ordn(rank)} luckiest of ${n}</div></div></div>
+    <div class="lxnote">Real points against expected points: the points a side would average from the chances (xG) created and allowed in each game. Plus = more points than the chances suggest.</div>`,"LIVE");
+}
+
+/* ---- season path ---- */
+function lfcPath(D,team){
+  const R=D.results.filter(r=>r.home===team||r.away===team);
+  if(!R.length) return "";
+  let cum=0;
+  const chips=R.map(r=>{ const h=r.home===team, o=h?r.away:r.home, gf=h?r.hg:r.ag, ga=h?r.ag:r.hg, res=gf>ga?"W":gf===ga?"D":"L"; cum+=res==="W"?3:res==="D"?1:0;
+    const rep=MATCH_REPORTS[r.gw+'|'+r.home+'|'+r.away];
+    const inner=`<div class="pcg">GW${r.gw}</div><div class="pcr">${res}</div><div class="pcs">${gf}-${ga}</div><div class="pco">${h?"v":"@"} ${esc(lxCode(o))}</div><div class="pcp">${cum} pts</div>${rep?'<div class="pcm">REPORT ↗</div>':''}`;
+    return rep?`<a class="pc ${res}" href="${rep}" title="Match report: ${esc(r.home)} ${r.hg}-${r.ag} ${esc(r.away)}">${inner}</a>`:`<div class="pc ${res}" title="${esc(r.home)} ${r.hg}-${r.ag} ${esc(r.away)}${/await|provisional/i.test(r.status)?' (provisional)':''}">${inner}</div>`; }).join('<span class="pcl"></span>');
+  return lxPanel("SEASON.PATH · PREMIER LEAGUE",`<div class="pcrow">${chips}</div><div class="lxnote">Every league result in order with running points. Chips marked REPORT open the full match report.</div>`,"LIVE");
+}
+
+/* ---- pitch (horizontal, 105 x 68) ---- */
+function lxPitchV(k,id){ const h=lxPitch(k,id); return {W:68*k,H:105*k,P:(x,y)=>[y*k,(105-x)*k],svg:`<g transform="translate(0,${105*k}) rotate(-90)">${h.svg}</g>`}; }
+function lxPitch(k,id){
+  const P=(x,y)=>[x*k,y*k], W=105*k, H=68*k, g=5*k;
+  const rect=(x1,y1,x2,y2)=>`<rect x="${(x1*k).toFixed(1)}" y="${(y1*k).toFixed(1)}" width="${((x2-x1)*k).toFixed(1)}" height="${((y2-y1)*k).toFixed(1)}"/>`;
+  const dy=Math.sqrt(9.15**2-5.5**2);
+  const arc=(xb,sw)=>`<path d="M${(xb*k).toFixed(1)} ${((34-dy)*k).toFixed(1)} A${(9.15*k).toFixed(1)} ${(9.15*k).toFixed(1)} 0 0 ${sw} ${(xb*k).toFixed(1)} ${((34+dy)*k).toFixed(1)}"/>`;
+  return {W,H,P,svg:`<defs><pattern id="${id}" width="${g}" height="${g}" patternUnits="userSpaceOnUse"><path d="M${g} 0H0V${g}" fill="none" stroke="rgba(29,233,160,.07)"/></pattern>
+   <radialGradient id="${id}r" cx="30%" cy="50%" r="70%"><stop offset="0" stop-color="rgba(255,59,92,.10)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/></radialGradient></defs>
+   <rect width="${W}" height="${H}" fill="#060c0c"/><rect width="${W}" height="${H}" fill="url(#${id})"/><rect width="${W}" height="${H}" fill="url(#${id}r)"/>
+   <g fill="none" stroke="${LXC.g}" stroke-width="1.6" opacity=".85" style="filter:drop-shadow(0 0 4px ${LXC.g})">
+   <rect x="1" y="1" width="${W-2}" height="${H-2}"/><line x1="${52.5*k}" y1="0" x2="${52.5*k}" y2="${H}"/><circle cx="${52.5*k}" cy="${34*k}" r="${9.15*k}"/>
+   ${rect(0,13.85,16.5,54.15)}${rect(0,24.85,5.5,43.15)}${rect(88.5,13.85,105,54.15)}${rect(99.5,24.85,105,43.15)}${arc(16.5,1)}${arc(88.5,0)}</g>
+   <circle cx="${52.5*k}" cy="${34*k}" r="2.5" fill="${LXC.g}"/>`};
+}
+
+/* ---- line-up board ---- */
+function lxDepth(p){ const a=p.pos||""; if(a==="G") return 0; if(/^(LB|RB|CD|SW)/.test(a)) return 1; if(/WB/.test(a)) return 1.6; if(/^DM/.test(a)) return 2; if(/^(LM|RM|CM)/.test(a)) return 2.5; if(/^(AM|LW|RW)/.test(a)) return 3; if(/^(F|CF|ST|LF|RF)/.test(a)) return 4; return 2.5; }
+function lxLat(p){ const a=p.pos||""; if(/^(LB|LM|LW|LWB)$/.test(a)) return -2; if(/^(RB|RM|RW|RWB)$/.test(a)) return 2; if(/-L$/.test(a)) return -1; if(/-R$/.test(a)) return 1; return 0; }
+function lxLayout(xi,form){
+  const gk=xi.find(p=>p.pos==="G")||xi.find(p=>p.fp===1); const out=xi.filter(p=>p!==gk).sort((a,b)=>lxDepth(a)-lxDepth(b)||a.fp-b.fp);
+  let lines=String(form||"").split("-").map(Number).filter(n=>n>0); if(lines.reduce((a,b)=>a+b,0)!==out.length) lines=[4,3,3];
+  const res=[]; if(gk) res.push({p:gk,x:6,y:34}); let i=0;
+  lines.forEach((n,li)=>{ const L=out.slice(i,i+n).sort((a,b)=>lxLat(a)-lxLat(b)||a.fp-b.fp); i+=n;
+    const x=lines.length>1?15+li*(33/(lines.length-1)):30;
+    L.forEach((p,j)=>res.push({p,x:x+(Math.abs(lxLat(p))===2&&li===0?2:0),y:n===1?34:7+54*(j+0.5)/n})); });
+  return res;
+}
+function lfcLineup(){
+  const G=(LFCX&&LFCX.lfc)||[]; if(!G.length) return lxPanel("LINEUP.SYS",lxWait());
+  const gi=LX.m==null||LX.m>=G.length?G.length-1:LX.m, g=G[gi], home=g.home==="Liverpool", opp=home?g.away:g.home, ro=g.ro.Liverpool||{};
+  const gf=home?g.hg:g.ag, ga=home?g.ag:g.hg, lay=lxLayout(ro.xi||[],ro.f);
+  const node=(pt)=>({p,x,y})=>{ const [cx,cy]=pt.P(x,y), r=22, pts=[...Array(6)].map((_,q)=>{const a=(-90+q*60)*Math.PI/180; return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`;}).join(" ");
+    const note=[p.g?("⚽".repeat(Math.min(p.g,3))):"", p.a?"A".repeat(Math.min(p.a,3)):"", p.off?`▼${p.off}`:""].filter(Boolean).join(" ");
+    return `<g class="lxn"><polygon points="${pts}" fill="${LXC.liv}2e" stroke="${LXC.liv}" stroke-width="2.5" style="filter:drop-shadow(0 0 7px ${LXC.liv})"/>
+     <text x="${cx}" y="${cy+6}" fill="#fff" font-size="17" font-weight="700" text-anchor="middle">${esc(p.no)}</text>
+     <text x="${cx}" y="${cy+r+16}" fill="${LXC.t}" font-size="13" text-anchor="middle" stroke="${LXC.bg}" stroke-width="4" paint-order="stroke">${esc(p.s.toUpperCase())}</text>
+     ${note?`<text x="${cx}" y="${cy+r+30}" fill="${LXC.y}" font-size="11" text-anchor="middle" stroke="${LXC.bg}" stroke-width="3" paint-order="stroke">${esc(note)}</text>`:''}
+     ${p.yc?`<rect x="${cx+r-6}" y="${cy-r-2}" width="8" height="11" rx="1" fill="${LXC.y}"/>`:''}${p.rc?`<rect x="${cx+r-6}" y="${cy-r-2}" width="8" height="11" rx="1" fill="${LXC.red}"/>`:''}</g>`; };
+  const mk=(pt,v)=>`<svg class="lxsvg" viewBox="0 0 ${pt.W} ${pt.H}" role="img" aria-label="Liverpool starting line-up">${pt.svg}${(v?lay.map(o=>({...o,x:o.x<=6?o.x:6+(o.x-6)*1.8})):lay).map(node(pt)).join("")}<text x="${pt.W-12}" y="18" fill="${LXC.g}" font-size="12" text-anchor="end" letter-spacing="2">${v?"ATTACK ▲":"ATTACK ▶▶"}</text></svg>`;
+  const svg=`<div class="lxwide">${mk(lxPitch(9,"lxlp"),0)}</div><div class="lxnarrow">${mk(lxPitchV(7.4,"lxlpv"),1)}</div>`;
+  const lg=g.goals.filter(x=>x.team==="Liverpool").map(x=>`${esc(x.type==="og"?x.p.replace(/ \(og\)$/," OG"):short_(x.p))} ${lxMin(x.m)}${x.type==="pen"?" (pen)":""}`).join(" · ")||"–";
+  const og=g.goals.filter(x=>x.team!=="Liverpool").map(x=>`${esc(x.type==="og"?x.p.replace(/ \(og\)$/," OG"):short_(x.p))} ${lxMin(x.m)}`).join(" · ");
+  const subs=(ro.subs||[]).slice().sort((a,b)=>(parseFloat(a.on)||45)-(parseFloat(b.on)||45)).map(s=>`<div class="lxsu"><span style="color:${LXC.g}">▲</span> ${esc(s.no)} ${esc(s.s)} <span style="color:${LXC.red}">▼</span> ${esc(s.for||"")} <span class="lxdim">${esc(s.on||"")}</span></div>`).join("")||'<div class="lxdim">None</div>';
+  const unused=(ro.unused||[]).map(s=>esc(s.s)).join(", ")||"–";
+  const sel=`<select class="lxsel" onchange="LX.m=+this.value;renderSquad()">${G.map((m,i)=>{const h=m.home==="Liverpool"; return `<option value="${i}"${i===gi?" selected":""}>${lxD(m.date)} · ${h?"v":"@"} ${esc(short(h?m.away:m.home))} ${h?m.hg:m.ag}-${h?m.ag:m.hg}</option>`;}).join("")}</select>`;
+  const res=gf>ga?"W":gf===ga?"D":"L";
+  return `<section class="lx lxlu"><div class="lxhd"><span class="lxp">&gt; LINEUP.SYS · <span style="color:${LXC.liv};text-shadow:0 0 10px ${LXC.liv}">LIVERPOOL</span> · ${esc(ro.f||"")}</span><span class="lxcur2"></span>${sel}</div>
+   <div class="lxlug"><div class="lxpitch">${svg}</div><div class="lxside"><div class="lxk">RESULT</div><div class="lxft">FT <span style="color:${LXC.liv}">${home?gf:ga}</span>-<span style="color:${LXC.opp}">${home?ga:gf}</span> <span class="lxdim2">${home?"LIV v "+esc(lxCode(opp)):esc(lxCode(opp))+" v LIV"}</span> <span class="wdl ${res}">${res}</span></div>
+   <div class="lxdim">${lg}${og?`<br><span style="color:${LXC.opp}">${esc(lxCode(opp))}:</span> ${og}`:''}</div><div class="lxdim">${esc(g.venue||"")} · ${lxDY(g.date)}</div>
+   <div class="lxk">SUBS USED</div>${subs}<div class="lxk">UNUSED</div><div class="lxdim">${unused}</div>
+   <div class="lxk">STATUS</div><div class="lxdim">XI LOADED · ${(ro.xi||[]).length}/11 NODES<br>SHAPE ${esc(ro.f||"–")} ✔</div></div></div>
+   <div class="lxnote">Starting XI as named for the match, set out in the listed formation. ⚽ goal · A assist · ▼ subbed off · cards shown on the marker.</div></section>`;
+}
+const short_=n=>String(n||"").split(" ").slice(-1)[0];
+
+/* ---- performance index scanner ---- */
+function lfcScanner(){
+  const G=(LFCX&&LFCX.lfc)||[]; if(!G.length) return "";
+  const gi=LX.m==null||LX.m>=G.length?G.length-1:LX.m, g=G[gi];
+  if(!g.perf||!g.perf.rows||!g.perf.rows.length) return lxPanel("PERFORMANCE.SCAN",'<div class="lxnote">No performance scores for this match yet.</div>');
+  const ro=g.ro.Liverpool||{}, all=[...(ro.xi||[]),...(ro.subs||[])];
+  const posOf=n=>{ const p=all.find(x=>x.s===n||x.n.endsWith(" "+n)||x.n===n); return p?p.pos:""; };
+  const rows=g.perf.rows, mx=Math.max(35,...rows.map(r=>r[1])), top=rows[0][1];
+  const colr=v=>v===top?LXC.g:v>=20?"#4cc9f0":v>=10?LXC.y:v>=0?"#ff9f1c":LXC.red;
+  const h=rows.map(([n,v])=>{ const on=Math.max(0,Math.round(v/mx*20)), c=colr(v);
+    return `<div class="sc" style="--c:${c}"><span class="scp">${esc(posOf(n)||"")}</span><span class="scn">${esc(n.toUpperCase())}${v===top?' <b class="star">★</b>':''}</span><span class="scs">${[...Array(20)].map((_,q)=>`<i class="${q<on?'on':''}"></i>`).join("")}</span><span class="scv">${v}</span></div>`; }).join("");
+  const home=g.home==="Liverpool";
+  return lxPanel(`PERFORMANCE.SCAN · ${home?"v":"@"} ${esc(short(home?g.away:g.home)).toUpperCase()}`,`${h}<div class="scf">SCAN ▮▮▮▮▮▮▮▮ COMPLETE${g.perf.final?'':' · PROVISIONAL'}</div>
+   <div class="lxnote">Official match performance score for every Liverpool player who played (it rewards goals, assists, saves, tackles, passing and more, and takes off for errors and cards). ★ = top scorer in the match. It is a points score, not a rating out of 10.</div>`,g.perf.final?"":"PROVISIONAL");
+}
+
+/* ---- team style ---- */
+const LX_AX=[["poss","Possession","%",s=>s.poss],["shots","Shots","/game",s=>s.shots/s.P],["sot","On target","/game",s=>s.sot/s.P],["acc","Pass accuracy","%",s=>100*s.accp/Math.max(1,s.passes)],
+ ["box","Shots in the box","%",s=>100*s.boxShots/Math.max(1,s.boxShots+s.outShots)],["wins","Ball wins","/game",s=>(s.tklw+s.int)/s.P],["corn","Corners won","/game",s=>s.corners/s.P],
+ ["sp","Set-piece goals","",s=>s.sp],["late","Late goals (76'+)","",s=>s.late]];
+const LX_SIM=[s=>s.poss,s=>s.shots/s.P,s=>s.sot/s.P,s=>100*s.accp/Math.max(1,s.passes),s=>s.crosses/s.P,s=>100*s.longb/Math.max(1,s.passes),s=>(s.tklw+s.int)/s.P,s=>s.corners/s.P,s=>100*s.boxShots/Math.max(1,s.boxShots+s.outShots),s=>s.shotsA/s.P];
+function lxSimilar(ST,team){
+  const T=Object.keys(ST), V=T.map(t=>LX_SIM.map(f=>f(ST[t])));
+  const mu=LX_SIM.map((_,i)=>V.reduce((a,v)=>a+v[i],0)/V.length), sd=LX_SIM.map((_,i)=>Math.sqrt(V.reduce((a,v)=>a+(v[i]-mu[i])**2,0)/V.length)||1);
+  const Z=V.map(v=>v.map((x,i)=>(x-mu[i])/sd[i])), me=Z[T.indexOf(team)];
+  const d=T.map((t,i)=>[t,Math.sqrt(Z[i].reduce((a,z,k)=>a+(z-me[k])**2,0))]).filter(x=>x[0]!==team).sort((a,b)=>a[1]-b[1]);
+  const far=d[d.length-1][1]||1; return d.map(([t,x])=>[t,Math.round(100*(1-x/far))]);
+}
+function lfcStyle(D){
+  if(!LFCX) return lxPanel("TEAM.STYLE",lxWait());
+  const ST=LFCX.style, s=ST.Liverpool; if(!s) return lxPanel("TEAM.STYLE",'<div class="lxnote">No data yet.</div>');
+  const T=Object.keys(ST);
+  const rank=(f,v)=>1+T.filter(t=>f(ST[t])>v).length;
+  const tiles=LX_AX.map(([k,l,u,f])=>{ const v=f(s); return `<div class="st"><div class="stl">${l}</div><div class="stv">${(Math.round(v*10)/10).toFixed(u?1:0)}<small>${u}</small></div><div class="str">${ordn(rank(f,v))} of ${T.length}</div></div>`; }).join("");
+  const spo=s.sp-s.pen, spb=s.sp?`${s.sp} (${[s.pen?s.pen+" penalt"+(s.pen===1?"y":"ies"):"",spo?spo+" from corners / free kicks":""].filter(Boolean).join(", ")})`:"0";
+  const extra=fmKV([["Goals scored / conceded",`${s.gf} / ${s.ga}`],["Late goals (76'+) scored / conceded",`${s.late} / ${s.lateA}`],["Early goals (0-15') scored",s.early],["Set pieces",spb],["Counter-attack goals",s.fast],
+    ["Headed shots",`${s.head} of ${s.boxShots+s.outShots}`],["Shots faced",`${(s.shotsA/s.P).toFixed(1)} a game (${s.sotA} on target)`],["Fouls committed",`${(s.fouls/s.P).toFixed(1)} a game`]]);
+  const sim=lxSimilar(ST,"Liverpool"), best=sim[0];
+  const simh=sim.slice(0,3).map(([t,p],i)=>`<div class="sim${i===0?' on':''}"><span class="simn">${esc(t.toUpperCase())}</span><span class="simb"><i style="width:${p}%"></i></span><span class="simv">${p}%</span></div>`).join("")+
+    `<div class="lxdim" style="margin-top:6px">Least alike: ${esc(sim[sim.length-1][0])}</div>`;
+  return `<div class="lxgrid2">${lxPanel("TEAM.STYLE · PER GAME · LEAGUE RANK",`<div class="stg">${tiles}</div>`,"LIVERPOOL")}
+   ${lxPanel("STYLE.RADAR",`<div class="lxrad"><canvas id="lx-radar"></canvas></div><div class="lxnote">Each spoke runs from the lowest club in the league (centre) to the highest (edge). <span style="color:${LXC.liv}">■ Liverpool</span> <span style="color:${LXC.opp}">■ ${esc(best[0])}</span> <span style="color:${LXC.m}">■ league average</span></div>`)}</div>
+   <div class="lxgrid2">${lxPanel("PLAYS.MOST.LIKE",`${simh}<div class="lxnote">Compares possession, shots for and against, shots on target, pass accuracy, crosses, long balls, ball wins, corners and shots from inside the box against every other league club. 100% = identical style, 0% = the least alike club.</div>`)}
+   ${lxPanel("STYLE.DETAIL",extra+`<div class="lxnote">League games only, ${s.P} played. Ball wins = tackles won plus interceptions. Late goals = 76th minute onwards, including stoppage time. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`)}</div>`;
+}
+function lfcStyleChart(){
+  if(!LFCX||!$("lx-radar")||typeof Chart==="undefined") return;
+  const ST=LFCX.style, T=Object.keys(ST), best=lxSimilar(ST,"Liverpool")[0][0];
+  const norm=(f,t)=>{ const v=T.map(x=>f(ST[x])), lo=Math.min(...v), hi=Math.max(...v); return hi>lo?100*(f(ST[t])-lo)/(hi-lo):50; };
+  const avg=LX_AX.map(([k,l,u,f])=>{ const v=T.map(x=>f(ST[x])), lo=Math.min(...v), hi=Math.max(...v), m=v.reduce((a,b)=>a+b,0)/v.length; return hi>lo?100*(m-lo)/(hi-lo):50; });
+  const ds=(lab,t,c)=>({label:lab,data:LX_AX.map(a=>norm(a[3],t)),borderColor:c,backgroundColor:c+"33",pointBackgroundColor:c,borderWidth:2,pointRadius:3});
+  draw("lx-radar",{type:"radar",data:{labels:LX_AX.map(a=>a[1]),datasets:[ds("Liverpool","Liverpool",LXC.liv),ds(best,best,LXC.opp),{label:"League average",data:avg,borderColor:LXC.m,backgroundColor:"transparent",borderDash:[4,4],borderWidth:1.5,pointRadius:0}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{ const a=LX_AX[c.dataIndex]; const t=c.dataset.label==="League average"?null:c.dataset.label; return t?`${t}: ${(Math.round(a[3](ST[t])*10)/10)}${a[2]==="%"?"%":""}`:"League average"; }}}},
+      scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},grid:{color:"rgba(29,233,160,.15)"},angleLines:{color:"rgba(29,233,160,.2)"},pointLabels:{color:LXC.t,font:{size:10.5}}}}}});
+}
+
+/* ---- shot radar ---- */
+const LX_Z={six_l:[101,29],six_r:[101,39],six_c:[101,34],close:[99,34],pen:[94,34],box_l:[92,22],box_r:[92,46],box_c:[93,34],angle_l:[101,12],angle_r:[101,56],out:[80,34],long:[68,34],long_l:[72,14],long_r:[72,54],far_l:[82,6],far_r:[82,62],fk:[78,34],og:[103,34]};
+function lfcShots(D){
+  const G=(LFCX&&LFCX.lfc)||[]; if(!G.length) return lxPanel("SHOT.RADAR",lxWait());
+  const gi=LX.m==null||LX.m>=G.length?G.length-1:LX.m, g=G[gi], home=g.home==="Liverpool", opp=home?g.away:g.home;
+  const show=x=>LX.shotSide==="both"||(LX.shotSide==="liv"?x.team==="Liverpool":x.team!=="Liverpool");
+  const mk=(pt,v)=>{ const used={}; let out="";
+  g.shots.filter(show).forEach(s=>{ let [x,y]=LX_Z[s.z]||LX_Z.box_c; const k=s.team+s.z, i=used[k]||0; used[k]=i+1;
+    const r=i?2.1+0.85*i:0, a=i*2.4; x+=r*Math.cos(a); y+=r*Math.sin(a); x=Math.min(104,x);
+    const liv=s.team==="Liverpool"; if(!liv){ x=105-x; y=68-y; } const c=liv?LXC.liv:LXC.opp, [cx,cy]=pt.P(x,y);
+    const ttl=`<title>${lxMin(s.m)} ${esc(s.p)} (${esc(lxCode(s.team))}) · ${s.o==="og"?"own goal":s.o==="miss"?"off target":s.o==="saved"?"on target, saved":s.o==="post"?"hit the woodwork":s.o}${s.h?" · header":""}</title>`;
+    const tx=v?cx+16:cx+(liv?-16:16), ta=v?"start":(liv?"end":"start");
+    if(s.o==="goal"||s.o==="og") out+=`<g>${ttl}<circle cx="${cx}" cy="${cy}" r="12" fill="${c}" stroke="#fff" stroke-width="2.5" style="filter:drop-shadow(0 0 10px #fff)"/><text x="${tx}" y="${cy+5}" fill="#fff" font-size="13" text-anchor="${ta}" stroke="${LXC.bg}" stroke-width="3" paint-order="stroke">${esc(short_(s.p).toUpperCase())}${s.o==="og"?" OG":""} ${lxMin(s.m)}</text></g>`;
+    else if(s.o==="saved") out+=`<g>${ttl}<circle cx="${cx}" cy="${cy}" r="8" fill="${c}" style="filter:drop-shadow(0 0 8px ${c})"/></g>`;
+    else if(s.o==="post") out+=`<g>${ttl}<circle cx="${cx}" cy="${cy}" r="8" fill="none" stroke="${LXC.y}" stroke-width="3" style="filter:drop-shadow(0 0 6px ${LXC.y})"/></g>`;
+    else if(s.o==="miss") out+=`<g>${ttl}<circle cx="${cx}" cy="${cy}" r="5.5" fill="none" stroke="${c}" stroke-width="2"/></g>`;
+    else out+=`<g stroke="${c}" stroke-width="2.2">${ttl}<line x1="${cx-4.5}" y1="${cy-4.5}" x2="${cx+4.5}" y2="${cy+4.5}"/><line x1="${cx-4.5}" y1="${cy+4.5}" x2="${cx+4.5}" y2="${cy-4.5}"/></g>`; });
+  return `<svg class="lxsvg" viewBox="0 0 ${pt.W} ${pt.H}" role="img" aria-label="Shot map">${pt.svg}${out}`+(v?`<text x="10" y="20" fill="${LXC.liv}" font-size="12">▲ LIV ATTACK</text><text x="10" y="${pt.H-10}" fill="${LXC.opp}" font-size="12">▼ ${esc(lxCode(opp))} ATTACK</text></svg>`:`<text x="10" y="${pt.H-10}" fill="${LXC.opp}" font-size="12">◀◀ ${esc(lxCode(opp))} ATTACK</text><text x="${pt.W-10}" y="${pt.H-10}" fill="${LXC.liv}" font-size="12" text-anchor="end">LIV ATTACK ▶▶</text></svg>`); };
+  const svg=`<div class="lxwide">${mk(lxPitch(7,"lxsp"),0)}</div><div class="lxnarrow">${mk(lxPitchV(5.6,"lxspv"),1)}</div>`;
+  const cnt=t=>{ const L=g.shots.filter(s=>s.team===t&&s.o!=="og"); return {n:L.length,on:L.filter(s=>s.o==="saved"||s.o==="goal").length,box:L.filter(s=>!/^(out|long|far|fk)/.test(s.z)).length}; };
+  const a=cnt("Liverpool"), b=cnt(opp);
+  const r=D.results.find(x=>x.home===g.home&&x.away===g.away), lx=r?(home?r.hxg:r.axg):null, ox=r?(home?r.axg:r.hxg):null;
+  const sel=`<select class="lxsel" onchange="LX.m=+this.value;renderSquad()">${G.map((m,i)=>{const h=m.home==="Liverpool"; return `<option value="${i}"${i===gi?" selected":""}>${lxD(m.date)} · ${h?"v":"@"} ${esc(short(h?m.away:m.home))} ${h?m.hg:m.ag}-${h?m.ag:m.hg}</option>`;}).join("")}</select>`;
+  const tg=["both","liv","opp"].map(k=>`<span class="lxtg${LX.shotSide===k?' on':''}" onclick="LX.shotSide='${k}';renderSquad()">${k==="both"?"BOTH":k==="liv"?"LIV":esc(lxCode(opp))}</span>`).join("");
+  // season zones (Liverpool)
+  const all=G.flatMap(m=>m.shots.filter(s=>s.team==="Liverpool"&&s.o!=="og")), zg=z=>all.filter(s=>z.test(s.z));
+  const zone=(l,re)=>{ const L=zg(re), gl=L.filter(s=>s.o==="goal").length; return `<tr><td class="l">${l}</td><td class="b">${L.length}</td><td>${L.filter(s=>s.o==="saved"||s.o==="goal").length}</td><td class="b">${gl}</td><td>${L.length?Math.round(100*gl/L.length)+"%":"–"}</td></tr>`; };
+  return `<section class="lx"><div class="lxh"><h3>&gt; SHOT.RADAR · ${home?"v":"@"} ${esc(short(opp)).toUpperCase()}</h3><span class="lxtag">POSITIONS APPROX.</span></div><div class="lxb">
+   <div class="lxctl">${sel}<span class="lxtgs">${tg}</span></div><div class="lxpitch">${svg}</div>
+   <div class="lgd"><span><b style="color:#fff">●</b> goal</span><span>● on target</span><span>○ off target</span><span>✕ blocked</span><span style="color:${LXC.y}">○ woodwork</span><span>bigger = better outcome</span></div>
+   <div class="lxkv"><span style="color:${LXC.liv}">LIV ${a.n} shots · ${a.on} on target · ${a.box} in the box${lx!=null?` · xG ${lx.toFixed(2)}`:''}</span><span style="color:${LXC.opp}">${esc(lxCode(opp))} ${b.n} shots · ${b.on} on target · ${b.box} in the box${ox!=null?` · xG ${ox.toFixed(2)}`:''}</span></div>
+   <div class="lxnote">Every shot from the match, placed in the area of the pitch it was taken from (positions are approximate, not exact spots). Marker size shows the outcome; shot-by-shot chance quality isn't shown, the xG figures are match totals. Hover or tap a marker for the minute and player.</div></div></section>
+   ${lxPanel(`LIVERPOOL SHOTS BY AREA · SEASON · ${G.length} LEAGUE GAMES`,`<div class="fm-scroll"><table class="lxt"><tr><th class="l">Area</th><th>Shots</th><th>On target</th><th>Goals</th><th>Conversion</th></tr>
+     ${zone("Six-yard box & very close",/^(six|close)/)}${zone("Penalty spot",/^pen$/)}${zone("Rest of the box",/^box/)}${zone("Tight angles",/^angle/)}${zone("Outside the box",/^(out|fk)$/)}${zone("Long range",/^(long|far)/)}</table></div>`)}`;
+}
+
+/* ---- managers ---- */
+function lxRec(G){ let W=0,Dd=0,L=0,gf=0,ga=0,cs=0; G.forEach(([f,a])=>{ gf+=f; ga+=a; if(f>a)W++; else if(f===a)Dd++; else L++; if(!a) cs++; }); const P=G.length; return {P,W,D:Dd,L,gf,ga,cs,ppg:P?(3*W+Dd)/P:0,win:P?100*W/P:0}; }
+function lxRecH(r,c){ return `<div class="mrec" style="--c:${c}"><div class="mbig">${r.ppg.toFixed(2)}<small>PPG</small></div><div>P${r.P} · <span class="pos">W${r.W}</span> D${r.D} <span class="neg">L${r.L}</span></div><div>Goals ${r.gf}-${r.ga} · win ${r.win.toFixed(0)}% · clean sheets ${r.cs}</div></div>`; }
+function lfcCurMgr(D){
+  if(!LFCX||!LFCX.cur||!LFCX.cur.Liverpool) return lxPanel("MANAGER.DUEL · CURRENT",lxWait());
+  const C=LFCX.cur, me=C.Liverpool, teams=Object.keys(C).filter(t=>t!=="Liverpool").sort();
+  if(!C[LX.cur]) LX.cur=teams[0]; const o=C[LX.cur];
+  const A=lxRec(me.g.map(g=>[g[2],g[3]])), B=lxRec(o.g.map(g=>[g[2],g[3]]));
+  const both=me.from>o.from?me.from:o.from;
+  const meet=me.g.filter(g=>g[1]===LX.cur&&g[0]>=both), mr=lxRec(meet.map(g=>[g[2],g[3]]));
+  const pl=t=>{ const r=tfRec(D.results,t); return `${r.P} played · W${r.W} D${r.D} L${r.L} · ${r.ppg} PPG`; };
+  const sel=`<select class="lxsel" onchange="LX.cur=this.value;renderSquad()">${teams.map(t=>`<option value="${esc(t)}"${t===LX.cur?" selected":""}>${esc(C[t].m)} · ${esc(t)}</option>`).join("")}</select>`;
+  const mh=meet.length?meet.map(g=>{ const r=g[2]>g[3]?"W":g[2]===g[3]?"D":"L"; return `<div class="fr"><span class="wdl ${r}">${r}</span><span class="frd">${esc(lxDY(g[0]))}</span><span class="fro">${esc(g[4])}</span><span class="frs">${g[2]}-${g[3]}</span></div>`; }).join(""):`<div class="lxdim">They haven't met since both took charge at their current clubs.</div>`;
+  return lxPanel("MANAGER.DUEL · CURRENT MANAGERS",`<div class="lxctl"><span class="lxdim">Andoni Iraola v</span> ${sel}</div>
+   <div class="mduel"><div><div class="mnm" style="color:${LXC.liv}">${esc(me.m.toUpperCase())}</div><div class="lxdim">Liverpool · since ${esc(lxDY(me.from))}</div>${lxRecH(A,LXC.liv)}<div class="lxdim">2026/27 league: ${pl("Liverpool")}</div></div>
+   <div class="mvs">VS</div><div><div class="mnm" style="color:${LXC.opp}">${esc(o.m.toUpperCase())}</div><div class="lxdim">${esc(LX.cur)} · since ${esc(lxDY(o.from))}</div>${lxRecH(B,LXC.opp)}<div class="lxdim">2026/27 league: ${pl(LX.cur)}</div></div></div>
+   <div class="lxrad lxline"><canvas id="lx-cur"></canvas></div>
+   <div class="lxk">MEETINGS WHILE BOTH IN CHARGE${meet.length?` · IRAOLA W${mr.W} D${mr.D} L${mr.L}`:''}</div>${mh}
+   <div class="lxnote">Record at their current club in all competitive games since being appointed (friendlies left out; shoot-outs count as draws). Chart = running points per game, game by game. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`);
+}
+function lxDec(s){ const B="0123456789abcdefghijklmnopqrstuvwxyz", o=[]; for(let i=0;i<s.length;i+=2) o.push([B.indexOf(s[i]),B.indexOf(s[i+1])]); return o; }
+function lfcAllMgr(){
+  if(!LFCH||!LFCH.clubs) return lxPanel("MANAGER.DUEL · ALL-TIME",lxWait());
+  const C=LFCH.clubs, L=C.lfc.mgrs;
+  if(LX.atA==null) LX.atA=Math.max(0,L.findIndex(m=>/Klopp/.test(m.n)));
+  if(LX.atB==null){ const i=C.city.mgrs.findIndex(m=>/Guardiola/.test(m.n)); LX.atB="city:"+Math.max(0,i); }
+  const a=L[LX.atA]||L[L.length-1], [bk,bi]=LX.atB.split(":"), b=(C[bk]||C.lfc).mgrs[+bi]||C.lfc.mgrs[0];
+  const ga=lxDec(a.s), gb=lxDec(b.s), N=Math.min(ga.length,gb.length), A=lxRec(ga.slice(0,N)), B=lxRec(gb.slice(0,N));
+  const selA=`<select class="lxsel" onchange="LX.atA=+this.value;renderSquad()">${L.map((m,i)=>`<option value="${i}"${i===LX.atA?" selected":""}>${esc(m.n)} (${m.f.slice(0,4)}${m.t?'-'+m.t.slice(0,4):'-'})</option>`).join("")}</select>`;
+  const selB=`<select class="lxsel" onchange="LX.atB=this.value;renderSquad()">${["lfc","united","city"].map(k=>`<optgroup label="${esc(C[k].club)}">${C[k].mgrs.map((m,i)=>`<option value="${k}:${i}"${(k+":"+i)===LX.atB?" selected":""}>${esc(m.n)} (${m.f.slice(0,4)}${m.t?'-'+m.t.slice(0,4):'-'})</option>`).join("")}</optgroup>`).join("")}</select>`;
+  let meet=[];
+  if(bk!=="lfc"){ const inA=d=>d>=a.f&&(!a.t||d<=a.t), inB=d=>(b.seg||[[b.f,b.t]]).some(([x,y])=>d>=x&&(!y||d<=y)); meet=(LFCH.meet[bk]||[]).filter(m=>inA(m[0])&&inB(m[0])); }
+  const mr=lxRec(meet.map(m=>[m[1],m[2]]));
+  const mh=bk==="lfc"?'<div class="lxdim">Both are Liverpool managers, so they never met.</div>':meet.length?`<div class="mmeet"><span class="pos">${esc(short_(a.n.replace(/ \(.*\)$/,"")))} W${mr.W}</span> · D${mr.D} · <span class="neg">${esc(short_(b.n.replace(/ \(.*\)$/,"")))} W${mr.L}</span> · goals ${mr.gf}-${mr.ga} (${meet.length} games)</div>`+
+    `<div class="mchips">${meet.slice(-12).map(m=>{const r=m[1]>m[2]?"W":m[1]===m[2]?"D":"L"; return `<span class="mc ${r}" title="${esc(lxDY(m[0]))}">${m[1]}-${m[2]}<small>${m[0].slice(0,4)}</small></span>`;}).join("")}</div>${meet.length>12?'<div class="lxdim">Latest 12 shown.</div>':''}`:'<div class="lxdim">Their teams never met while both were in charge.</div>';
+  return lxPanel("MANAGER.DUEL · ALL-TIME · SAME NUMBER OF GAMES",`<div class="lxctl">${selA}<span class="mvs2">VS</span>${selB}</div>
+   <div class="lxk">FIRST ${N} GAMES IN CHARGE EACH</div>
+   <div class="mduel"><div><div class="mnm" style="color:${LXC.liv}">${esc(a.n.toUpperCase())}</div><div class="lxdim">Liverpool · ${ga.length} games</div>${lxRecH(A,LXC.liv)}</div><div class="mvs">VS</div>
+   <div><div class="mnm" style="color:${LXC.opp}">${esc(b.n.toUpperCase())}</div><div class="lxdim">${esc((C[bk]||C.lfc).club)} · ${gb.length} games</div>${lxRecH(B,LXC.opp)}</div></div>
+   <div class="lxrad lxline"><canvas id="lx-at"></canvas></div><div class="lxk">HEAD TO HEAD (ALL MEETINGS WHILE BOTH IN CHARGE)</div>${mh}
+   <div class="lxnote">All official games, same counting as the Managers page (3 points for a win in every era, shoot-outs count as draws). Both records use the same number of games: the shorter of the two reigns. Chart = points race over those games. Updated ${esc(lxDY(LFCH.updated.slice(0,10)))}.</div>`);
+}
+function lxRace(id,ga,gb,la,lb,mode){
+  if(!$(id)||typeof Chart==="undefined") return;
+  const run=g=>{ let p=0; return g.map(([f,a],i)=>{ p+=f>a?3:f===a?1:0; return mode==="ppg"?+(p/(i+1)).toFixed(2):p; }); };
+  const N=mode==="ppg"?Math.max(ga.length,gb.length):Math.min(ga.length,gb.length);
+  const A=run(ga.slice(0,N)), B=run(gb.slice(0,N));
+  draw(id,{type:"line",data:{labels:[...Array(N)].map((_,i)=>i+1),datasets:[{label:la,data:A,borderColor:LXC.liv,backgroundColor:LXC.liv+"22",pointRadius:0,borderWidth:2,tension:.2},{label:lb,data:B,borderColor:LXC.opp,backgroundColor:LXC.opp+"22",pointRadius:0,borderWidth:2,tension:.2}]},
+    options:{interaction:{mode:"index",intersect:false},plugins:{legend:{labels:{color:LXC.t}}},scales:{x:{title:{display:true,text:"games in charge"},grid:{color:"rgba(29,233,160,.07)"},ticks:{maxTicksLimit:10}},y:{title:{display:true,text:mode==="ppg"?"points per game":"points"},grid:{color:"rgba(29,233,160,.07)"},beginAtZero:true}}}});
+}
+function lfcMgrCharts(){
+  try{ if(LFCX&&LFCX.cur&&LFCX.cur[LX.cur]){ const C=LFCX.cur; lxRace("lx-cur",C.Liverpool.g.map(g=>[g[2],g[3]]),C[LX.cur].g.map(g=>[g[2],g[3]]),C.Liverpool.m,C[LX.cur].m,"ppg"); } }catch(e){ console.warn(e); }
+  try{ if(LFCH&&LFCH.clubs){ const C=LFCH.clubs, a=C.lfc.mgrs[LX.atA], [bk,bi]=String(LX.atB).split(":"), b=(C[bk]||C.lfc).mgrs[+bi]; if(a&&b) lxRace("lx-at",lxDec(a.s),lxDec(b.s),a.n,b.n,"pts"); } }catch(e){ console.warn(e); }
+}
+
+/* ---- wiring ---- */
+function lfcWrap(tab,plBody,D,S,team){
+  if(!LFCX||!LFCH) lfcLoad();
+  const base=()=>plBody()||"";
+  const wrap=h=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${h}</div></div>`;
+  if(tab==="overview") return wrap(`<div class="lxgrid2">${lfcHeat(D,team)}${lfcLuck(D,team)}</div>${lfcPath(D,team)}`)+base();
+  if(tab==="tactics") return wrap(lfcLineup()+lfcScanner())+base();
+  if(tab==="style") return wrap(lfcStyle(D));
+  if(tab==="shots") return wrap(lfcShots(D));
+  if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
+  if(tab==="fixtures") return wrap(`${lfcPath(D,team)}${lfcHeat(D,team)}`)+base();
+  return base();
+}
+function lfcAfter(tab){ try{ if(tab==="style") lfcStyleChart(); if(tab==="managers") lfcMgrCharts(); }catch(e){ console.warn(e); } }
+
 /* ---------- club page tabs (shared by Squads + Scotland) ---------- */
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
 const FM_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
 const FM_TAB={squads:"squad",spfl:"squad"};
-(function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&FM_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
-function tabBar(view){ return `<div class="fm-tabs" role="tablist">`+FM_TABS.map(([k,l])=>`<div class="fm-tab${FM_TAB[view]===k?' on':''}" role="tab" tabindex="0" onclick="fmTab('${view}','${k}')" onkeydown="if(event.key==='Enter')fmTab('${view}','${k}')">${l}</div>`).join("")+`</div>`; }
+(function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&LFC_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
+function tabBar(view){ return `<div class="fm-tabs" role="tablist">`+fmTabsFor(view).map(([k,l])=>`<div class="fm-tab${FM_TAB[view]===k?' on':''}" role="tab" tabindex="0" onclick="fmTab('${view}','${k}')" onkeydown="if(event.key==='Enter')fmTab('${view}','${k}')">${l}</div>`).join("")+`</div>`; }
 function fmHash(view){ const sel=$(view==="squads"?"teampick":"spflpick"); if(!sel||!sel.value) return;
   const h=`#${view}/${encodeURIComponent(sel.value)}/${FM_TAB[view]}`; if(location.hash!==h) try{ history.replaceState(null,"",h); }catch(e){ location.hash=h; } }
-function fmTab(view,k){ FM_TAB[view]=FM_TABS.some(t=>t[0]===k)?k:"squad"; fmHash(view); view==="squads"?renderSquad():renderSpfl(); }
+function fmTab(view,k){ FM_TAB[view]=fmTabsFor(view).some(t=>t[0]===k)?k:"squad"; fmHash(view); view==="squads"?renderSquad():renderSpfl(); }
 const fmPanel=(h,b,note)=>`<div class="fm-panel"><div class="fm-ph">${h}</div><div class="fm-pb">${b}</div>${note?`<div class="note">${note}</div>`:''}</div>`;
 const fmKV=rows=>`<table class="kv">`+rows.filter(Boolean).map(([k,v])=>`<tr><td class="l">${k}</td><td class="b">${v}</td></tr>`).join("")+`</table>`;
 function fmRank(list,key,val,asc){ const v=list.map(x=>x[key]).filter(x=>x!=null); if(val==null||!v.length) return ""; const r=1+v.filter(x=>asc?x<val:x>val).length; return ` <small>(${ordn(r)} of ${v.length})</small>`; }
@@ -693,6 +1092,7 @@ function renderSquad(){
   const maxGw=Math.max(0,...D.results.map(r=>r.gw||0));
   const prov=res.some(r=>/await|provisional/i.test(r.status));
   const covered=S.filter(p=>D.values[p.id]!=null).length;
+  if(team!=="Liverpool"&&!FM_TABS.some(t=>t[0]===FM_TAB.squads)) FM_TAB.squads="squad";
   const tab=FM_TAB.squads;
   const TS=(D.teams||[]).find(x=>x.team===team)||{};
   const f2=v=>v==null?'–':(+v).toFixed(2);
@@ -752,8 +1152,8 @@ function renderSquad(){
     <div><div class="fm-club">${esc(team)}</div><div class="fm-sub">Premier League 2026/27 · Squad overview · after gameweek ${maxGw}</div></div>
     <div class="fm-hs"><div><b>${ordn(T.pos)}</b><span>Position</span></div><div><b>${T.pts??"--"}</b><span>Points</span></div><div><b>${T.W??0}-${T.D??0}-${T.L??0}</b><span>W-D-L</span></div>
       <div><b>${T.GF??0}:${T.GA??0}</b><span>Goals</span></div><div><b style="font-size:15px;padding-top:4px">${(T.form||[]).map(x=>`<span class="wdl ${esc(x)}">${esc(x)}</span>`).join(" ")||"--"}</b><span>Last 5</span></div></div></div>
-  ${tabBar("squads")}
-  ${tab!=="squad"?plBody():`<div class="fm-wrap"><div class="fm-main"><div class="fm-panel"><div class="fm-ph">First-team squad · ${plural(S.length,"player")}</div><div class="fm-scroll">
+  ${team==="Liverpool"?lfcTicker(S,T):""}${tabBar("squads")}
+  ${tab!=="squad"?(team==="Liverpool"?lfcWrap(tab,plBody,D,S,team):plBody()):`<div class="fm-wrap"><div class="fm-main"><div class="fm-panel"><div class="fm-ph">First-team squad · ${plural(S.length,"player")}</div><div class="fm-scroll">
     <table><tr><th></th><th>Pos</th><th class="l">Name</th><th>Age</th><th>Apps / Sts</th><th>Mins</th><th>Gls</th><th>Ast</th><th>xG</th><th>xA</th><th>CS</th><th>ATT*</th><th>CRE*</th><th>DEF*</th><th>Last 5 (FPL pts)</th><th>Avg pts</th><th>Tot</th><th>Value</th></tr>${trs}</table></div>
     <div class="key"><span><span class="av ok">●</span>Available</span><span><span class="av dbt">!</span>Doubt</span><span><span class="av inj">✚</span>Injured / unavailable</span><span><span class="av sus">S</span>Suspended</span>
       <span><span class="pip g">6</span>6+ pts</span><span><span class="pip l">3</span>3-5</span><span><span class="pip a">1</span>1-2</span><span><span class="pip r">0</span>0 or less</span><span><span class="pip dnp"></span>Did not play</span>
@@ -766,6 +1166,7 @@ function renderSquad(){
   </div></div>`}
   <div class="fm-foot">Sources: club records and public match data${D.lastUpdated?' (updated '+esc(D.lastUpdated)+')':''}. Apps = league games with minutes; players sold or loaned out are not shown.${prov?' * Result provisional.':''}
    Values: Transfermarkt market-value estimates${D.valMeta.checked?' (checked '+esc(D.valMeta.checked)+')':''}${D.valMeta.rate?', converted from € at '+esc(D.valMeta.rate):''}; ${covered} of ${S.length} players have a value, '–' = no Transfermarkt figure. Styled after Football Manager; not affiliated.</div></div>`;
+  if(team==="Liverpool") lfcAfter(tab);
 }
 
 /* ===== SENTIMENT (static snapshot) ===== */
