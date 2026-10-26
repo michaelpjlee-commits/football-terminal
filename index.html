@@ -223,6 +223,7 @@ body.v-sentiment #view-sentiment{display:block}
 .st-p{background:var(--green2)}.st-n{background:#26343d}.st-x{background:var(--red)}
 .st-net{font-family:var(--mono);text-align:right}
 .st-tag{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--gold);border:1px solid var(--gold);padding:2px 8px;margin-left:8px}
+.st-fresh{font-family:var(--mono);font-size:12px;color:var(--green);margin:2px 0 12px;letter-spacing:.3px;text-shadow:0 0 6px rgba(0,255,156,.35)}.st-fresh .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);margin-right:7px;vertical-align:1px;animation:stpulse 2s ease-in-out infinite}.st-fresh .due{color:var(--gold);text-shadow:0 0 6px rgba(255,201,64,.4)}.st-fresh .muted{text-shadow:none}@keyframes stpulse{0%,100%{opacity:1}50%{opacity:.25}}
 .st-sum li{margin:5px 0}
 /* ===== MANAGERS view ===== */
 #view-managers{display:none}
@@ -800,10 +801,26 @@ function stLine(H,lab,keyN){const n=H.length,x=i=>50+i*(560/Math.max(1,n-1)),y=v
  return `<svg viewBox="0 0 640 250" style="width:100%;max-height:360px;margin-top:8px">${[0,50,100].map(v=>`<line x1="40" x2="630" y1="${y(v)}" y2="${y(v)}" stroke="#1a2a33"/><text x="8" y="${y(v)+4}" fill="#6b8290" font-size="11" font-family="monospace">${v}</text>`).join("")}
  <polyline fill="none" stroke="#00ff9c" stroke-width="3" points="${H.map((h,i)=>x(i)+','+y(h.m)).join(' ')}"/>
  ${H.map((h,i)=>`<circle cx="${x(i)}" cy="${y(h.m)}" r="5" fill="${i===n-1?'#ff4d6d':'#00ff9c'}"/><text x="${x(i)}" y="${y(h.m)-10}" fill="#d7e3ea" font-size="12" text-anchor="middle" font-family="monospace">${h.m}</text><text x="${x(i)}" y="214" fill="#6b8290" font-size="10" text-anchor="middle" font-family="monospace">${lab(h)}</text>${keyN?`<text x="${x(i)}" y="228" fill="#3f5866" font-size="9" text-anchor="middle" font-family="monospace"></text>`:''}`).join("")}</svg>`;}
+/* sentiment freshness line: rota weekday (0=Sun) per club; a club refreshes overnight on its weekday once its latest week ended 5+ days before */
+const ST_ROTA={lfc:4,brighton:4,brentford:4,united:5,leeds:5,everton:5,city:6,hull:6,ipswich:6,arsenal:0,newcastle:0,villa:0,spurs:1,palace:1,bournemouth:1,chelsea:2,coventry:2,fulham:2,forest:3,sunderland:3};
+const ST_UP={brighton:"2026-10-23",chelsea:"2026-10-23",brentford:"2026-10-23",leeds:"2026-10-24",everton:"2026-10-24",hull:"2026-10-24",ipswich:"2026-10-25",newcastle:"2026-10-25",villa:"2026-10-25",palace:"2026-10-26",bournemouth:"2026-10-26",coventry:"2026-10-26"};
+function stFresh(k,C){try{
+ const iso=d=>d.toISOString().slice(0,10), P=x=>new Date(x+"T00:00:00Z"), fmt=d=>d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",timeZone:"UTC"});
+ let end=Object.keys((C&&C.days)||{}).sort().pop()||"";
+ if(C&&C.we&&C.we>end) end=C.we;
+ if(!end) return "";
+ let up=[end,ST_UP[k]||"",(C&&C.up)||""].sort().pop();
+ const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/London",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+ const wd=ST_ROTA[k]; let nx="";
+ if(wd!==undefined){const d=P(end); d.setUTCDate(d.getUTCDate()+5); while(d.getUTCDay()!==wd) d.setUTCDate(d.getUTCDate()+1); nx=iso(d);}
+ const next=!nx?"":(nx<=today?`<span class="due">Update due tonight</span>`:`Next update ${fmt(P(nx))} <span class="muted">(overnight)</span>`);
+ return `<div class="st-fresh"><span class="dot"></span>Last updated ${fmt(P(up))}${next?' · '+next:''}</div>`;
+}catch(e){return "";}}
 function stRenderClub(el,C){
  const days=Object.entries(C.days).map(([d,c])=>({l:new Date(d+"T12:00Z").toLocaleDateString("en-GB",{weekday:"short",day:"numeric"}),m:Math.round(100*(c.pos||0)/Math.max(1,(c.pos||0)+(c.neg||0))),n:(c.pos||0)+(c.neu||0)+(c.neg||0)}));
  el.innerHTML=`
  <div class="lif-head"><h2>${C.name} fan mood</h2><span class="st-tag">Snapshot: ${C.range||"14–21 Oct 2026"}</span><span class="legend" style="margin-left:auto">by @tamerton · ${C.range||"14–21 Oct 2026"}</span></div>
+ ${stFresh(C.key||stClub(),C)}
  <div class="st-grid">
   <div class="card"><div class="legend">MOOD SCORE ${C.cav?"(out of 100)":"(positive ÷ positive+negative)"}</div>
    <div style="display:flex;align-items:flex-end;gap:24px;margin:12px 0"><div class="st-big">${C.mood}<span style="font-size:24px;color:var(--dim)">/100</span></div>
@@ -828,6 +845,7 @@ function stRenderLfc(el){
  const mx=Math.max(...ST.themes.map(t=>t[1]));
  el.innerHTML=`
  <div class="lif-head"><h2>LFC fan mood</h2><span class="st-tag">Snapshot: 14–21 Oct 2026</span><span class="legend" style="margin-left:auto">by @tamerton · 14–21 Oct 2026</span></div>
+ ${stFresh("lfc",ST)}
  <div class="st-grid">
   <div class="card"><div class="legend">MOOD SCORE (positive ÷ positive+negative)</div>
    <div style="display:flex;align-items:flex-end;gap:24px;margin:12px 0"><div class="st-big">${ST.mood}<span style="font-size:24px;color:var(--dim)">/100</span></div>
