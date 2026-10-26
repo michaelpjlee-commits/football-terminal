@@ -368,6 +368,17 @@ table.lxt td{text-align:center;padding:4px;border-bottom:1px solid rgba(29,233,1
 .fm-main.lxcol{width:100%;align-self:stretch;min-width:0}
 .lxnarrow{display:none}
 @media (max-width:700px){.lxwide{display:none}.lxnarrow{display:block;max-width:420px;margin:0 auto}.lxluck{justify-content:center}.lxg{width:200px}.lxlv{font-size:28px}}
+
+/* formation tracker */
+.ft{border:1px solid rgba(29,233,160,.25);border-radius:6px;padding:10px 12px;margin-bottom:10px;background:#060c0c}
+.ft.on{border-color:#1de9a0;box-shadow:0 0 14px rgba(29,233,160,.2)}
+.fth{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.ftf{font-size:22px;font-weight:700;color:#fff;letter-spacing:.12em;text-shadow:0 0 10px rgba(29,233,160,.6)}
+.ftb{font-size:10px;letter-spacing:.1em;border-radius:3px;padding:2px 6px}.ftm{background:#1de9a0;color:#03110c}.ftp{border:1px solid #ffd23f;color:#ffd23f}
+.fts{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:8px 0}.fts>div{display:flex;flex-direction:column}.fts b{font-size:18px;color:#fff}.fts span{font-size:10px;color:#9fcfba;letter-spacing:.08em}
+.fts .ftbar{flex:1 1 160px;min-width:140px}.ftbar i{display:block;height:8px;background:#1de9a0;box-shadow:0 0 8px #1de9a0;margin-bottom:4px}
+.ftcs{display:flex;flex-wrap:wrap;gap:6px}.ftc{display:inline-flex;border:1px solid;border-radius:3px;font-size:11.5px;overflow:hidden}
+.ftc a{color:inherit;text-decoration:none;padding:3px 7px}.ftc a:hover{background:rgba(255,255,255,.06)}.ftc .ftr{background:#1de9a0;color:#03110c;font-size:10px;display:flex;align-items:center}
+.ftc.W{border-color:#1de9a0;color:#1de9a0}.ftc.D{border-color:#ffd23f;color:#ffd23f}.ftc.L{border-color:#ff3b5c;color:#ff3b5c}
 </style>
 <style>
 #tf-card .tfmeta{font-family:var(--mono);font-size:11px;color:var(--dim)}
@@ -826,7 +837,7 @@ function lfcLineup(){
   const unused=(ro.unused||[]).map(s=>esc(s.s)).join(", ")||"–";
   const sel=`<select class="lxsel" onchange="LX.m=+this.value;renderSquad()">${G.map((m,i)=>{const h=m.home==="Liverpool"; return `<option value="${i}"${i===gi?" selected":""}>${lxD(m.date)} · ${h?"v":"@"} ${esc(short(h?m.away:m.home))} ${h?m.hg:m.ag}-${h?m.ag:m.hg}</option>`;}).join("")}</select>`;
   const res=gf>ga?"W":gf===ga?"D":"L";
-  return `<section class="lx lxlu"><div class="lxhd"><span class="lxp">&gt; LINEUP.SYS · <span style="color:${LXC.liv};text-shadow:0 0 10px ${LXC.liv}">LIVERPOOL</span> · ${esc(ro.f||"")}</span><span class="lxcur2"></span>${sel}</div>
+  return `<section class="lx lxlu" id="lx-lineup"><div class="lxhd"><span class="lxp">&gt; LINEUP.SYS · <span style="color:${LXC.liv};text-shadow:0 0 10px ${LXC.liv}">LIVERPOOL</span> · ${esc(ro.f||"")}</span><span class="lxcur2"></span>${sel}</div>
    <div class="lxlug"><div class="lxpitch">${svg}</div><div class="lxside"><div class="lxk">RESULT</div><div class="lxft">FT <span style="color:${LXC.liv}">${home?gf:ga}</span>-<span style="color:${LXC.opp}">${home?ga:gf}</span> <span class="lxdim2">${home?"LIV v "+esc(lxCode(opp)):esc(lxCode(opp))+" v LIV"}</span> <span class="wdl ${res}">${res}</span></div>
    <div class="lxdim">${lg}${og?`<br><span style="color:${LXC.opp}">${esc(lxCode(opp))}:</span> ${og}`:''}</div><div class="lxdim">${esc(g.venue||"")} · ${lxDY(g.date)}</div>
    <div class="lxk">SUBS USED</div>${subs}<div class="lxk">UNUSED</div><div class="lxdim">${unused}</div>
@@ -982,13 +993,33 @@ function lfcMgrCharts(){
   try{ if(LFCH&&LFCH.clubs){ const C=LFCH.clubs, a=C.lfc.mgrs[LX.atA], [bk,bi]=String(LX.atB).split(":"), b=(C[bk]||C.lfc).mgrs[+bi]; if(a&&b) lxRace("lx-at",lxDec(a.s),lxDec(b.s),a.n,b.n,"pts"); } }catch(e){ console.warn(e); }
 }
 
+
+/* ---- formation tracker ---- */
+function lxGoLineup(i){ LX.m=i; renderSquad(); setTimeout(()=>{ const e=$("lx-lineup"); if(e) e.scrollIntoView({behavior:"smooth",block:"start"}); },30); }
+function lfcFormations(D){
+  const G=(LFCX&&LFCX.lfc)||[]; if(!G.length) return lxPanel("FORMATION.TRACKER",lxWait());
+  const F={};
+  G.forEach((g,i)=>{ const f=g.form||((g.ro||{}).Liverpool||{}).f||"n/a", h=g.home==="Liverpool", gf=h?g.hg:g.ag, ga=h?g.ag:g.hg, r=gf>ga?"W":gf===ga?"D":"L";
+    const o=F[f]||(F[f]={f,P:0,W:0,D:0,L:0,gf:0,ga:0,g:[]}); o.P++; o[r]++; o.gf+=gf; o.ga+=ga;
+    const rr=D.results.find(x=>x.home===g.home&&x.away===g.away), gw=g.gw||(rr&&rr.gw), rep=gw?MATCH_REPORTS[gw+'|'+g.home+'|'+g.away]:null;
+    o.g.push({i,r,gf,ga,h,opp:h?g.away:g.home,gw,rep,date:g.date}); });
+  const L=Object.values(F).map(o=>({...o,ppg:(3*o.W+o.D)/o.P})).sort((a,b)=>b.P-a.P||b.ppg-a.ppg);
+  const real=L.filter(o=>o.f!=="n/a"), most=real.length?real[0].f:null, best=real.length?[...real].sort((a,b)=>b.ppg-a.ppg||b.P-a.P)[0].f:null;
+  const rows=L.map(o=>{ const tags=[o.f===most?'<span class="ftb ftm">MOST USED</span>':'',o.f===best?'<span class="ftb ftp">BEST PPG</span>':''].join("");
+    const chips=o.g.map(c=>`<span class="ftc ${c.r}"><a href="#squads/Liverpool/tactics" onclick="lxGoLineup(${c.i});return false" title="Open the line-up for this game">${c.gw?`GW${c.gw} · `:''}${c.h?"v":"@"} ${esc(lxCode(c.opp))} ${c.gf}-${c.ga}</a>${c.rep?`<a class="ftr" href="${c.rep}" title="Match report">REPORT ↗</a>`:''}</span>`).join("");
+    return `<div class="ft${o.f===most||o.f===best?' on':''}"><div class="fth"><span class="ftf">${esc(o.f)}</span>${tags}</div>
+     <div class="fts"><div><b>${o.P}</b><span>started</span></div><div><b>${o.W}-${o.D}-${o.L}</b><span>W-D-L</span></div><div><b>${o.ppg.toFixed(2)}</b><span>PPG</span></div><div><b>${o.gf}:${o.ga}</b><span>goals</span></div>
+     <div class="ftbar"><i style="width:${(100*o.P/G.length).toFixed(0)}%"></i><span>${Math.round(100*o.P/G.length)}% of games</span></div></div><div class="ftcs">${chips}</div></div>`; }).join("");
+  return lxPanel(`FORMATION.TRACKER · ${G.length} LEAGUE GAMES`,`${rows}<div class="lxnote">Formation Liverpool were listed in at kick-off for each league game. A game with no listed formation shows as n/a. Tap a match to load its line-up above${Object.values(MATCH_REPORTS).length?'; REPORT opens the match report':''}.</div>`,real.length===1?"1 SHAPE":real.length+" SHAPES");
+}
+
 /* ---- wiring ---- */
 function lfcWrap(tab,plBody,D,S,team){
   if(!LFCX||!LFCH) lfcLoad();
   const base=()=>plBody()||"";
   const wrap=h=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${h}</div></div>`;
   if(tab==="overview") return wrap(`<div class="lxgrid2">${lfcHeat(D,team)}${lfcLuck(D,team)}</div>${lfcPath(D,team)}`)+base();
-  if(tab==="tactics") return wrap(lfcLineup()+lfcScanner())+base();
+  if(tab==="tactics") return wrap(lfcLineup()+lfcScanner()+lfcFormations(D));
   if(tab==="style") return wrap(lfcStyle(D));
   if(tab==="shots") return wrap(lfcShots(D));
   if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
