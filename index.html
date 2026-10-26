@@ -270,6 +270,7 @@ body.v-managers #view-managers{display:block}
   .fm-top{padding:12px}.fm-club{font-size:22px}.fm-hs{margin-left:0}.fm-wrap{padding:8px}
   .fm-tabs{padding:0 6px}.fm-tab{padding:8px 10px}
 }
+.mr-link{color:#1de9a0;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-decoration:none;border:1px solid #1de9a0;border-radius:3px;padding:1px 6px;box-shadow:0 0 8px rgba(29,233,160,.35);white-space:nowrap}.mr-link:hover{background:rgba(29,233,160,.15)}
 </style>
 </head>
 <body>
@@ -549,6 +550,8 @@ function render(D, fetchedAt, stale){
 }
 
 
+/* ---------- match reports (gw|home|away -> page) ---------- */
+const MATCH_REPORTS={"8|Liverpool|Brighton":"reports/2026-10-25-liverpool-v-brighton.html"};
 /* ---------- club page tabs (shared by Squads + Scotland) ---------- */
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
 const FM_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
@@ -670,7 +673,7 @@ function renderSquad(){
     if(tab==="fixtures"){
       const R=D.results.filter(r=>r.home===team||r.away===team).slice().reverse();
       const rr=R.map(r=>{ const home=r.home===team, opp=home?r.away:r.home, lg=home?r.hg:r.ag, og=home?r.ag:r.hg, lx=home?r.hxg:r.axg, ox=home?r.axg:r.hxg, o=lg>og?"W":lg===og?"D":"L";
-        return `<tr><td>GW${esc(r.gw)}</td><td>${esc(r.date)}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td class="b">${lg}-${og}</td><td><span class="wdl ${o}">${o}</span></td><td>${lx!=null?lx.toFixed(2)+' - '+ox.toFixed(2):'–'}</td><td>${/await/i.test(r.status)?'awaiting FPL confirmation':''}</td></tr>`; }).join("");
+        return `<tr><td>GW${esc(r.gw)}</td><td>${esc(r.date)}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td class="b">${lg}-${og}</td><td><span class="wdl ${o}">${o}</span></td><td>${lx!=null?lx.toFixed(2)+' - '+ox.toFixed(2):'–'}</td><td>${MATCH_REPORTS[r.gw+'|'+r.home+'|'+r.away]?`<a class="mr-link" href="${MATCH_REPORTS[r.gw+'|'+r.home+'|'+r.away]}">MATCH REPORT ↗</a> `:''}${/await/i.test(r.status)?'awaiting FPL confirmation':''}</td></tr>`; }).join("");
       const F=D.fixtures.filter(f=>f.home===team||f.away===team);
       const fr=F.map(f=>{ const home=f.home===team, opp=home?f.away:f.home;
         return `<tr><td>GW${esc(f.gw)}</td><td>${esc(f.date)}</td><td>${esc(f.ko||'–')}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td>${posOf(opp)?ordn(posOf(opp)):'–'}</td><td>${esc(f.status||'')}</td></tr>`; }).join("");
