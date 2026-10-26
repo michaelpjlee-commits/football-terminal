@@ -272,6 +272,19 @@ body.v-managers #view-managers{display:block}
 }
 .mr-link{color:#1de9a0;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-decoration:none;border:1px solid #1de9a0;border-radius:3px;padding:1px 6px;box-shadow:0 0 8px rgba(29,233,160,.35);white-space:nowrap}.mr-link:hover{background:rgba(29,233,160,.15)}
 </style>
+<style>
+#tf-card .tfmeta{font-family:var(--mono);font-size:11px;color:var(--dim)}
+#tf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:10px;margin-top:8px}
+.tfm{border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:rgba(0,255,156,.03)}
+.tfm.live{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,156,.25)}
+.tfm .tfh{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim);margin-bottom:6px}
+.tfm .tfh b{color:var(--green);font-weight:600}
+.tfrow{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;padding:4px 0}
+.tfrow+.tfrow{border-top:1px dashed var(--line)}
+.tfteam{font-weight:600}.tfteam .xg{font-weight:400}
+.tfmgr{font-family:var(--mono);font-size:11px;color:var(--dim);grid-column:1/3}
+.tfmgr .pp{color:var(--gold)}
+</style>
 </head>
 <body>
 <header>
@@ -312,6 +325,10 @@ body.v-managers #view-managers{display:block}
     <div class="card kpi"><div class="lbl">Most clean sheets</div><div class="val pos" id="k-cs">--</div><div class="sub" id="k-cs-sub"></div></div>
     <div class="card kpi"><div class="lbl">Scoring above expected (xG)</div><div class="val pos" id="k-xg">--</div><div class="sub" id="k-xg-sub"></div></div>
   </section>
+  <section class="grid panels" id="tf-sec"><div class="card p12" id="tf-card" style="grid-column:1/-1"><div class="ph"><h2 id="tf-title">&gt; Today's fixtures</h2><span class="meta" id="tf-meta"></span></div>
+    <div class="tfmeta">Kick-off times UK · manager's league record this season (P W D L · points per game) · form oldest → newest</div>
+    <div id="tf-grid"></div></div></section>
+
 
   <section class="grid panels">
     <div class="card p7"><div class="ph"><h2>League table</h2><span class="meta legend"><span class="tag t-dd">TOP 4</span><span class="tag" style="color:var(--red);border-color:var(--red)">BOTTOM 3</span> form oldest → newest</span></div><div class="scroll" style="max-height:640px"><table id="t-table"></table></div></div>
@@ -432,6 +449,31 @@ const formTags = arr => arr.map(x=>`<span class="f ${esc(x)}">${esc(x)}</span>`)
 const short = s => String(s).replace("Nott'm Forest","Forest").replace("Crystal Palace","Palace").replace("Coventry City","Coventry").replace("Ipswich Town","Ipswich").replace("Hull City","Hull");
 
 /* ---------- render ---------- */
+
+const TF_MGR={"Arsenal":"Mikel Arteta","Aston Villa":"Unai Emery","Bournemouth":"Marco Rose","Brentford":"Keith Andrews","Brighton":"Fabian Hürzeler","Chelsea":"Xabi Alonso","Coventry City":"Frank Lampard","Crystal Palace":"Pierre Sage","Everton":"David Moyes","Fulham":"Álvaro Arbeloa","Hull City":"Sergej Jakirović","Ipswich Town":"Gary O'Neil","Leeds":"Daniel Farke","Liverpool":"Andoni Iraola","Man City":"Enzo Maresca","Man Utd":"Michael Carrick","Newcastle":"Matthias Jaissle","Nott'm Forest":"Oliver Glasner","Sunderland":"Régis Le Bris","Spurs":"Roberto De Zerbi"};
+function tfToday(){
+  const p=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",weekday:"short",day:"2-digit",month:"short",year:"numeric"}).formatToParts(new Date());
+  const g=k=>(p.find(x=>x.type===k)||{}).value||"";
+  return `${g("weekday")} ${g("day")} ${g("month")} ${g("year")}`;
+}
+function tfRec(R,team){
+  let P=0,W=0,Dr=0,L=0; const seq=[];
+  R.forEach(r=>{ if(r.home!==team&&r.away!==team) return; const gf=r.home===team?r.hg:r.ag, ga=r.home===team?r.ag:r.hg;
+    P++; if(gf>ga){W++;seq.push("W");} else if(gf<ga){L++;seq.push("L");} else {Dr++;seq.push("D");} });
+  return {P,W,D:Dr,L,ppg:P?((3*W+Dr)/P).toFixed(2):"--",form:seq.slice(-5)};
+}
+function renderTodayFx(R,F,T){
+  if(!$("tf-grid")) return;
+  const today=tfToday(), tms=d=>Date.parse(String(d).replace(/^\w+ /,"")), t0=tms(today); F=F.filter(f=>!(tms(f.date)<t0)); let list=F.filter(f=>f.date===today), isToday=true;
+  if(!list.length){ isToday=false; const d0=F.length?F[0].date:null; list=d0?F.filter(f=>f.date===d0||f.gw===F[0].gw):[]; }
+  $("tf-title").textContent=isToday?"> Today's fixtures":"> No games today · next fixtures";
+  $("tf-meta").textContent=isToday?`${list.length} game${list.length===1?"":"s"} today`:(list.length?`GW${list[0].gw} · ${list.length} games`:"no fixtures left");
+  const posOf=t=>{const r=T.find(x=>x.team===t); return r?r.pos:"";};
+  const side=t=>{const m=tfRec(R,t), mg=TF_MGR[t]; return `<div class="tfrow"><div class="tfteam">${esc(t)} <span class="xg">(${posOf(t)})</span></div><div>${formTags(m.form)}</div>
+    <div class="tfmgr">${mg?esc(mg)+" · ":""}P${m.P} W${m.W} D${m.D} L${m.L} · <span class="pp">${m.ppg} PPG</span></div></div>`;};
+  $("tf-grid").innerHTML=list.map(f=>{const live=/in play/i.test(f.status);
+    return `<div class="tfm${live?" live":""}"><div class="tfh"><span>${isToday?"TODAY":esc(f.date.replace(/ \d{4}$/,""))} · <b>${esc(f.ko)}</b>${live?' <span class="tag t-live">LIVE</span>':''}</span><span class="tag t-gw">GW${f.gw}</span></div>${side(f.home)}${side(f.away)}</div>`;}).join("")||'<div class="tfmeta">No fixtures to show.</div>';
+}
 function render(D, fetchedAt, stale){
   const T=D.table, R=D.results, F=D.fixtures, TS=D.teams, PL=D.players;
   if(!T.length) throw new Error("The Table tab came back empty");
@@ -529,6 +571,9 @@ function render(D, fetchedAt, stale){
     next.map(f=>`<tr class="${/in play/i.test(f.status)?'today':''}"><td><span class="tag t-gw">GW${f.gw}</span></td><td class="mono">${esc(f.date.replace(/ \d{4}$/,""))}</td><td class="mono">${esc(f.ko)}${/in play/i.test(f.status)?' <span class="tag t-live">LIVE</span>':''}</td>
       <td class="num" style="font-family:inherit">${esc(f.home)} <span class="xg">(${posOf(f.home)})</span></td><td class="xg" style="text-align:center">v</td><td>${esc(f.away)} <span class="xg">(${posOf(f.away)})</span></td></tr>`).join("");
 
+
+  // Today's fixtures (next fixtures when there are no games today)
+  try{ renderTodayFx(R,F,T); }catch(e){ console.warn(e); }
   // Form
   const fs=[...T].sort((a,b)=>b.formPts-a.formPts);
   draw("c-form",{type:"bar",data:{labels:fs.map(r=>short(r.team)),datasets:[{label:"Points from last 5",data:fs.map(r=>r.formPts),
