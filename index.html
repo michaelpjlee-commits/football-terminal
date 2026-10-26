@@ -510,7 +510,7 @@ function render(D, fetchedAt, stale){
   const last=R.slice(-20).reverse();
   $("m-res").textContent=`${n} played · last 20 shown`;
   $("t-res").innerHTML=`<tr><th>GW</th><th>Date</th><th class="num">Home</th><th style="text-align:center">Score</th><th>Away</th><th class="num">xG</th></tr>`+
-    last.map(r=>`<tr><td><span class="tag t-gw">GW${r.gw}</span></td><td class="mono">${esc(r.date.replace(/ \d{4}$/,""))}${/await/i.test(r.status)?' <span class="tag t-prov" title="'+esc(r.status)+'">PROV</span>':''}</td>
+    last.map(r=>`<tr><td><span class="tag t-gw">GW${r.gw}</span></td><td class="mono">${esc(r.date.replace(/ \d{4}$/,""))}${/await|provisional/i.test(r.status)?' <span class="tag t-prov" title="Provisional">PROV</span>':''}</td>
       <td class="num" style="font-family:inherit;${r.hg>r.ag?'color:'+C.green+';font-weight:600':''}">${esc(r.home)}</td><td style="text-align:center"><span class="score">${r.hg} – ${r.ag}</span></td>
       <td style="${r.ag>r.hg?'color:'+C.green+';font-weight:600':''}">${esc(r.away)}</td><td class="num xg">${r.hxg!=null?f1(r.hxg)+' – '+f1(r.axg):''}</td></tr>`).join("");
 
@@ -639,13 +639,13 @@ function renderSquad(){
   const injh=inj.map(p=>`<div class="inj">${av(p)}<div><b>${esc(p.name)}</b> <span class="badge ${esc(p.pos)}">${esc(p.pos)}</span>${p.status&&!/injured/i.test(p.status)?` <span class="muted" style="font-size:11px">${esc(p.status)}${p.chance!=null&&!/unavailable|suspended/i.test(p.status)?' · '+p.chance+'% chance':''}</span>`:''}<div class="news2">${esc(p.news||p.status)}</div></div></div>`).join("")||'<div class="muted">No injuries or doubts reported</div>';
   const res=D.results.filter(r=>r.home===team||r.away===team).slice(-5).reverse();
   const formh=res.map(r=>{ const home=r.home===team, opp=home?r.away:r.home, lg=home?r.hg:r.ag, og=home?r.ag:r.hg, lx=home?r.hxg:r.axg, ox=home?r.axg:r.hxg; const o=lg>og?"W":lg===og?"D":"L";
-    return `<div class="fr"><span class="wdl ${o}">${o}</span><span class="frd">${esc((r.date||"").replace(/^\w+ /,"").replace(/ \d{4}$/,""))}${/await/i.test(r.status)?'*':''}</span><span class="fro">${esc(opp)} <small>(${home?"H":"A"})</small></span><span class="frs">${lg}-${og}</span><span class="frx">${lx!=null?`xG ${lx.toFixed(2)}-${ox.toFixed(2)}`:''}</span></div>`; }).join("")||'<div class="muted">No games yet</div>';
+    return `<div class="fr"><span class="wdl ${o}">${o}</span><span class="frd">${esc((r.date||"").replace(/^\w+ /,"").replace(/ \d{4}$/,""))}${/await|provisional/i.test(r.status)?'*':''}</span><span class="fro">${esc(opp)} <small>(${home?"H":"A"})</small></span><span class="frs">${lg}-${og}</span><span class="frx">${lx!=null?`xG ${lx.toFixed(2)}-${ox.toFixed(2)}`:''}</span></div>`; }).join("")||'<div class="muted">No games yet</div>';
   const posOf=t=>{const r=D.table.find(x=>x.team===t); return r?r.pos:null;};
   const nx=D.fixtures.filter(f=>(f.home===team||f.away===team)&&!/in play/i.test(f.status)).slice(0,3);
   const nxh=nx.map(f=>{ const home=f.home===team, opp=home?f.away:f.home;
     return `<div class="fx"><div class="fxd">GW${esc(f.gw)} · ${esc(f.date)}${f.ko?' · '+esc(f.ko)+' UK':''}</div><div class="fxo">${esc(opp)} <span class="ha ${home?"H":"A"}">${home?"HOME":"AWAY"}</span><span class="fxp">${posOf(opp)?ordn(posOf(opp))+' in table':''}</span></div></div>`; }).join("")||'<div class="muted">No fixtures listed</div>';
   const maxGw=Math.max(0,...D.results.map(r=>r.gw||0));
-  const prov=res.some(r=>/await/i.test(r.status));
+  const prov=res.some(r=>/await|provisional/i.test(r.status));
   const covered=S.filter(p=>D.values[p.id]!=null).length;
   const tab=FM_TAB.squads;
   const TS=(D.teams||[]).find(x=>x.team===team)||{};
@@ -673,7 +673,7 @@ function renderSquad(){
     if(tab==="fixtures"){
       const R=D.results.filter(r=>r.home===team||r.away===team).slice().reverse();
       const rr=R.map(r=>{ const home=r.home===team, opp=home?r.away:r.home, lg=home?r.hg:r.ag, og=home?r.ag:r.hg, lx=home?r.hxg:r.axg, ox=home?r.axg:r.hxg, o=lg>og?"W":lg===og?"D":"L";
-        return `<tr><td>GW${esc(r.gw)}</td><td>${esc(r.date)}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td class="b">${lg}-${og}</td><td><span class="wdl ${o}">${o}</span></td><td>${lx!=null?lx.toFixed(2)+' - '+ox.toFixed(2):'–'}</td><td>${MATCH_REPORTS[r.gw+'|'+r.home+'|'+r.away]?`<a class="mr-link" href="${MATCH_REPORTS[r.gw+'|'+r.home+'|'+r.away]}">MATCH REPORT ↗</a> `:''}${/await/i.test(r.status)?'awaiting FPL confirmation':''}</td></tr>`; }).join("");
+        return `<tr><td>GW${esc(r.gw)}</td><td>${esc(r.date)}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td class="b">${lg}-${og}</td><td><span class="wdl ${o}">${o}</span></td><td>${lx!=null?lx.toFixed(2)+' - '+ox.toFixed(2):'–'}</td><td>${MATCH_REPORTS[r.gw+'|'+r.home+'|'+r.away]?`<a class="mr-link" href="${MATCH_REPORTS[r.gw+'|'+r.home+'|'+r.away]}">MATCH REPORT ↗</a> `:''}${/await|provisional/i.test(r.status)?'provisional':''}</td></tr>`; }).join("");
       const F=D.fixtures.filter(f=>f.home===team||f.away===team);
       const fr=F.map(f=>{ const home=f.home===team, opp=home?f.away:f.home;
         return `<tr><td>GW${esc(f.gw)}</td><td>${esc(f.date)}</td><td>${esc(f.ko||'–')}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td>${posOf(opp)?ordn(posOf(opp)):'–'}</td><td>${esc(f.status||'')}</td></tr>`; }).join("");
@@ -718,7 +718,7 @@ function renderSquad(){
     <div class="fm-panel"><div class="fm-ph">Team form · last 5</div><div class="fm-pb">${formh}</div></div>
     <div class="fm-panel"><div class="fm-ph">Next 3 fixtures</div><div class="fm-pb">${nxh}</div></div>
   </div></div>`}
-  <div class="fm-foot">Sources: club records and public match data${D.lastUpdated?' (updated '+esc(D.lastUpdated)+')':''}. Apps = league games with minutes; players sold or loaned out are not shown.${prov?' * Result awaiting final FPL confirmation.':''}
+  <div class="fm-foot">Sources: club records and public match data${D.lastUpdated?' (updated '+esc(D.lastUpdated)+')':''}. Apps = league games with minutes; players sold or loaned out are not shown.${prov?' * Result provisional.':''}
    Values: Transfermarkt market-value estimates${D.valMeta.checked?' (checked '+esc(D.valMeta.checked)+')':''}${D.valMeta.rate?', converted from € at '+esc(D.valMeta.rate):''}; ${covered} of ${S.length} players have a value, '–' = no Transfermarkt figure. Styled after Football Manager; not affiliated.</div></div>`;
 }
 
