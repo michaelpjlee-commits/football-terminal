@@ -706,8 +706,8 @@ function render(D, fetchedAt, stale){
 /* ---------- match reports (gw|home|away -> page) ---------- */
 const MATCH_REPORTS={"8|Liverpool|Brighton":"reports/2026-10-25-liverpool-v-brighton.html"};
 /* ===== LIVERPOOL CLUB PAGE · terminal extras (Liverpool only for now) ===== */
-const LFC_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["style","Style"],["shots","Shots"],["managers","Managers"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
-function fmTabsFor(view){ try{ if(view==="squads" && (($("teampick")&&$("teampick").value)||"Liverpool")==="Liverpool") return LFC_TABS; }catch(e){} return FM_TABS; }
+const LFC_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Team Style"],["shots","Shots"],["managers","Managers"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+function fmTabsFor(view){ try{ if(view==="squads" && (($("teampick")&&$("teampick").value)||"Liverpool")==="Liverpool") return LFC_TABS; }catch(e){} return view==="spfl"?SPFL_TABS:FM_TABS; }
 let LFCX=null, LFCH=null, LFCX_ERR=false, LFCX_BUSY=false;
 const LX={m:null, shotSide:"both", cur:"Man City", atA:null, atB:null};
 const LXC={red:"#ff3b5c", liv:"#ff3b5c", opp:"#3d9bff", g:"#1de9a0", y:"#ffd23f", t:"#d6ffe9", m:"#9fcfba", bg:"#050a0a"};
@@ -716,7 +716,7 @@ function lfcLoad(){
   const j=u=>fetch(u,{cache:"no-store"}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); });
   Promise.all([j("data/lfc-extras.json"),j("data/managers-h2h.json")]).then(([a,b])=>{ LFCX=a; LFCH=b; LFCX_ERR=false; })
    .catch(e=>{ console.warn("extras",e); LFCX_ERR=true; })
-   .finally(()=>{ LFCX_BUSY=false; if(document.body.classList.contains("v-squads") && $("teampick") && $("teampick").value==="Liverpool") renderSquad(); });
+   .finally(()=>{ LFCX_BUSY=false; if(document.body.classList.contains("v-squads") && $("teampick") && ($("teampick").value==="Liverpool"||FM_TAB.squads==="tactics")) renderSquad(); });
 }
 const lxCode=t=>(CLUBS[t]||[String(t).slice(0,3).toUpperCase()])[0];
 const lxPanel=(title,body,tag,cls)=>`<section class="lx ${cls||''}"><div class="lxh"><h3>&gt; ${title}</h3>${tag?`<span class="lxtag">${tag}</span>`:''}</div><div class="lxb">${body}</div></section>`;
@@ -1019,20 +1019,48 @@ function lfcWrap(tab,plBody,D,S,team){
   const base=()=>plBody()||"";
   const wrap=h=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${h}</div></div>`;
   if(tab==="overview") return wrap(`<div class="lxgrid2">${lfcHeat(D,team)}${lfcLuck(D,team)}</div>${lfcPath(D,team)}`)+base();
-  if(tab==="tactics") return wrap(lfcLineup()+lfcScanner()+lfcFormations(D));
-  if(tab==="style") return wrap(lfcStyle(D));
+  if(tab==="tactics"||tab==="style") return wrap(lfcStyle(D)+lfcLineup()+lfcScanner()+lfcFormations(D));
   if(tab==="shots") return wrap(lfcShots(D));
   if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
   if(tab==="fixtures") return wrap(`${lfcPath(D,team)}${lfcHeat(D,team)}`)+base();
   return base();
 }
-function lfcAfter(tab){ try{ if(tab==="style") lfcStyleChart(); if(tab==="managers") lfcMgrCharts(); }catch(e){ console.warn(e); } }
+function lfcAfter(tab){ try{ if(tab==="style"||tab==="tactics") lfcStyleChart(); if(tab==="managers") lfcMgrCharts(); }catch(e){ console.warn(e); } }
+
+/* ===== TEAM STYLE · every PL club (style stats + radar) ===== */
+function tsPage(team){
+  const wrap=h=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${h}</div></div>`;
+  if(!LFCX){ lfcLoad(); return wrap(lxPanel("TEAM.STYLE",lxWait())); }
+  const ST=LFCX.style||{}, s=ST[team]; if(!s||!s.P) return wrap(lxPanel("TEAM.STYLE",'<div class="lxnote">No league games counted for this club yet.</div>'));
+  const T=Object.keys(ST), rank=(f,v)=>1+T.filter(t=>f(ST[t])>v).length, code=esc(lxCode(team));
+  const tiles=LX_AX.map(([k,l,u,f])=>{ const v=f(s); return `<div class="st"><div class="stl">${l}</div><div class="stv">${(Math.round(v*10)/10).toFixed(u?1:0)}<small>${u}</small></div><div class="str">${ordn(rank(f,v))} of ${T.length}</div></div>`; }).join("");
+  const spo=s.sp-s.pen, spb=s.sp?`${s.sp} (${[s.pen?s.pen+" penalt"+(s.pen===1?"y":"ies"):"",spo?spo+" from corners / free kicks":""].filter(Boolean).join(", ")})`:"0";
+  const extra=fmKV([["Goals scored / conceded",`${s.gf} / ${s.ga}`],["Late goals (76'+) scored / conceded",`${s.late} / ${s.lateA}`],["Early goals (0-15') scored",s.early],["Set-piece goals",spb],["Counter-attack goals",s.fast],
+    ["Shots / on target",`${s.shots} / ${s.sot} (${(s.shots/s.P).toFixed(1)} a game)`],["Shots from inside the box",`${s.boxShots} of ${s.boxShots+s.outShots}`],["Headed shots",`${s.head} of ${s.boxShots+s.outShots}`],
+    ["Ball wins",`${s.tklw+s.int} (${s.tklw} tackles won, ${s.int} interceptions)`],["Shots faced",`${(s.shotsA/s.P).toFixed(1)} a game (${s.sotA} on target)`],["Fouls committed",`${(s.fouls/s.P).toFixed(1)} a game`]]);
+  return wrap(`<div class="lxgrid2">${lxPanel("TEAM.STYLE · PER GAME · LEAGUE RANK",`<div class="stg">${tiles}</div>`,code)}
+   ${lxPanel("STYLE.RADAR",`<div class="lxrad"><canvas id="ts-radar"></canvas></div><div class="lxnote">Each spoke runs from the lowest club in the league (centre) to the highest (edge). <span style="color:${LXC.g}">■ ${esc(team)}</span> <span style="color:${LXC.m}">■ league average</span></div>`)}</div>
+   ${lxPanel("STYLE.DETAIL",extra+`<div class="lxnote">League games only, ${s.P} played. Ball wins = tackles won plus interceptions. Set-piece goals include penalties. Late goals = 76th minute onwards, including stoppage time. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`)}
+   <div class="lxnote" style="margin-top:0">Coming next to Team Style: the latest line-up board and a "plays most like" comparison.</div>`);
+}
+function tsChart(team){
+  if(!LFCX||!$("ts-radar")||typeof Chart==="undefined") return;
+  const ST=LFCX.style, T=Object.keys(ST); if(!ST[team]) return;
+  const nr=(f,v)=>{ const a=T.map(x=>f(ST[x])), lo=Math.min(...a), hi=Math.max(...a); return hi>lo?100*(v-lo)/(hi-lo):50; };
+  const mean=f=>T.reduce((a,x)=>a+f(ST[x]),0)/T.length, c=LXC.g;
+  try{ draw("ts-radar",{type:"radar",data:{labels:LX_AX.map(a=>a[1]),datasets:[
+    {label:team,data:LX_AX.map(a=>nr(a[3],a[3](ST[team]))),borderColor:c,backgroundColor:c+"33",pointBackgroundColor:c,borderWidth:2,pointRadius:3},
+    {label:"League average",data:LX_AX.map(a=>nr(a[3],mean(a[3]))),borderColor:LXC.m,backgroundColor:"transparent",borderDash:[4,4],borderWidth:1.5,pointRadius:0}]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>{ const a=LX_AX[x.dataIndex], v=x.datasetIndex?mean(a[3]):a[3](ST[team]); return `${x.dataset.label}: ${(Math.round(v*10)/10)}${a[2]==="%"?"%":a[2]?" "+a[2]:""}`; }}}},
+      scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},grid:{color:"rgba(29,233,160,.15)"},angleLines:{color:"rgba(29,233,160,.2)"},pointLabels:{color:LXC.t,font:{size:10.5}}}}}}); }catch(e){ console.warn(e); }
+}
 
 /* ---------- club page tabs (shared by Squads + Scotland) ---------- */
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
-const FM_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+const FM_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Team Style"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+const SPFL_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
 const FM_TAB={squads:"squad",spfl:"squad"};
-(function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&LFC_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
+(function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&m[2]==="style") m[2]="tactics"; if(m&&LFC_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
 function tabBar(view){ return `<div class="fm-tabs" role="tablist">`+fmTabsFor(view).map(([k,l])=>`<div class="fm-tab${FM_TAB[view]===k?' on':''}" role="tab" tabindex="0" onclick="fmTab('${view}','${k}')" onkeydown="if(event.key==='Enter')fmTab('${view}','${k}')">${l}</div>`).join("")+`</div>`; }
 function fmHash(view){ const sel=$(view==="squads"?"teampick":"spflpick"); if(!sel||!sel.value) return;
   const h=`#${view}/${encodeURIComponent(sel.value)}/${FM_TAB[view]}`; if(location.hash!==h) try{ history.replaceState(null,"",h); }catch(e){ location.hash=h; } }
@@ -1138,15 +1166,7 @@ function renderSquad(){
         ["xG / xGA",`${f2(TS.xG)} / ${f2(TS.xGA)}`],["Clean sheets",d0(TS.cs)],["Yellow / red cards",`${d0(TS.yc)} / ${d0(TS.rc)}`],["Players used",used]]))}
         <div class="fm-grid">${fmPanel("Team form · last 5",formh)}${fmPanel("Next 3 fixtures",nxh)}</div></div>${side}</div>`;
     }
-    if(tab==="tactics"){
-      const {xi,next}=mostUsedXI(S.map(p=>({...p,short:p.name})));
-      if(xi.length<11) return `<div class="fm-wrap"><div class="fm-main">${fmPanel("Most-used XI from starts",'<div class="muted">Not enough starts yet to build an XI.</div>')}</div></div>`;
-      const P=pitchHtml(xi);
-      const list=xi.map(p=>`<div class="lb"><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span><span class="n">${esc(p.name)}</span><span class="v">${p.starts}</span></div>`).join("");
-      return `<div class="fm-wrap"><div class="fm-main">${fmPanel(`Most-used XI from starts · ${P.shape}`,P.html,
-        `The 11 players with the most league starts (the top goalkeeper plus the top 10 outfield players), placed by their FPL position. ${P.shape} is just how those positions split. It's not a real formation or a real line-up. Ties are broken by minutes.`)}</div>
-        <div class="fm-side">${fmPanel("XI · league starts",list)}${fmPanel("Next most starts",next.map(p=>`<div class="lb"><span class="badge ${esc(p.pos)}">${esc(p.pos)}</span><span class="n">${esc(p.name)}</span><span class="v">${p.starts}</span></div>`).join("")||'<div class="muted">–</div>')}</div></div>`;
-    }
+    if(tab==="tactics") return tsPage(team);
     if(tab==="fixtures"){
       const R=D.results.filter(r=>r.home===team||r.away===team).slice().reverse();
       const rr=R.map(r=>{ const home=r.home===team, opp=home?r.away:r.home, lg=home?r.hg:r.ag, og=home?r.ag:r.hg, lx=home?r.hxg:r.axg, ox=home?r.axg:r.hxg, o=lg>og?"W":lg===og?"D":"L";
@@ -1197,7 +1217,7 @@ function renderSquad(){
   </div></div>`}
   <div class="fm-foot">Sources: club records and public match data${D.lastUpdated?' (updated '+esc(D.lastUpdated)+')':''}. Apps = league games with minutes; players sold or loaned out are not shown.${prov?' * Result provisional.':''}
    Values: Transfermarkt market-value estimates${D.valMeta.checked?' (checked '+esc(D.valMeta.checked)+')':''}${D.valMeta.rate?', converted from € at '+esc(D.valMeta.rate):''}; ${covered} of ${S.length} players have a value, '–' = no Transfermarkt figure. Styled after Football Manager; not affiliated.</div></div>`;
-  if(team==="Liverpool") lfcAfter(tab);
+  if(team==="Liverpool") lfcAfter(tab); else if(tab==="tactics") tsChart(team);
 }
 
 /* ===== SENTIMENT (static snapshot) ===== */
