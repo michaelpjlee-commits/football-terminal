@@ -1031,19 +1031,22 @@ function lfcFormations(D){
 }
 
 /* ---- latest news (headlines + links only) ---- */
-let LXN=null, LXN_ERR=false, LXN_BUSY=false;
-function lfcNewsLoad(){ if(LXN||LXN_BUSY) return; LXN_BUSY=true;
-  fetch("data/news/lfc.json",{cache:"no-store"}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(d=>{ LXN=d; }).catch(e=>{ LXN_ERR=true; })
-   .finally(()=>{ LXN_BUSY=false; if(document.body.classList.contains("v-squads") && FM_TAB.squads==="news") renderSquad(); }); }
+const NEWS_SLUG={"Liverpool":"lfc","Arsenal":"arsenal","Aston Villa":"aston-villa","Bournemouth":"bournemouth","Brentford":"brentford","Brighton":"brighton","Chelsea":"chelsea","Coventry City":"coventry","Crystal Palace":"crystal-palace","Everton":"everton","Fulham":"fulham","Hull City":"hull","Ipswich Town":"ipswich","Leeds":"leeds","Man City":"man-city","Man Utd":"man-united","Newcastle":"newcastle","Nott'm Forest":"nottm-forest","Spurs":"spurs","Sunderland":"sunderland","Aberdeen":"aberdeen","Celtic":"celtic","Dundee":"dundee","Dundee United":"dundee-united","Falkirk":"falkirk","Heart of Midlothian":"hearts","Hibernian":"hibernian","Kilmarnock":"kilmarnock","Motherwell":"motherwell","Rangers":"rangers","St Johnstone":"st-johnstone","St Mirren":"st-mirren"};
+let NEWS_ALL=null, NEWS_ERR=0, NEWS_BUSY=0;
+function newsLoad(){ if(NEWS_ALL||NEWS_BUSY||NEWS_ERR) return; NEWS_BUSY=1;
+  fetch("data/news/all.json",{cache:"no-store"}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(d=>{ NEWS_ALL=d; }).catch(e=>{ NEWS_ERR=1; })
+   .finally(()=>{ NEWS_BUSY=0; const b=document.body.classList; if(b.contains("v-squads")&&FM_TAB.squads==="news") renderSquad(); else if(b.contains("v-spfl")&&FM_TAB.spfl==="news") renderSpfl(); }); }
 const lxNT=s=>new Date(s).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",timeZone:"Europe/London"});
-function lfcNews(){
-  lfcNewsLoad();
+function clubNews(team){
+  const slug=NEWS_SLUG[team]; newsLoad(); const D=slug&&NEWS_ALL&&(NEWS_ALL.clubs||{})[slug], T=esc(String(team).toUpperCase());
   const foot='<div class="lxnote">Headlines link to the original publishers. To request removal, contact @tamerton on X.</div>';
-  if(!LXN) return lxPanel("LATEST.NEWS · LIVERPOOL",(LXN_ERR?'<div class="lxnote">No news right now.</div>':'<div class="lxnote">Loading<span class="lxcur">_</span></div>')+foot);
-  const it=(LXN.items||[]).filter(x=>x&&x.title&&/^https?:\/\//.test(x.url||""));
+  if(!D) return lxPanel(`LATEST.NEWS · ${T}`,((!slug||NEWS_ERR||NEWS_ALL)?'<div class="lxnote">No news right now.</div>':'<div class="lxnote">Loading<span class="lxcur">_</span></div>')+foot);
+  const it=(D.items||[]).filter(x=>x&&x.title&&/^https?:\/\//.test(x.url||""));
   const rows=it.length?it.map(x=>`<a class="nwi" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer"><span class="nws">${esc(x.source)}</span><span class="nwt">${esc(x.title)}</span><span class="nwd">${lxNT(x.published)} UK ↗</span></a>`).join(""):'<div class="lxnote">No news right now.</div>';
-  return lxPanel("LATEST.NEWS · LIVERPOOL",`<div class="nwl">${rows}</div><div class="lxnote">Last updated ${LXN.updated?lxNT(LXN.updated)+' UK':'—'}.</div>${foot}`,it.length+" HEADLINES");
+  return lxPanel(`LATEST.NEWS · ${T}`,`<div class="nwl">${rows}</div><div class="lxnote">Last updated ${D.updated?lxNT(D.updated)+' UK':'—'}.</div>${foot}`,it.length+" HEADLINES");
 }
+function lfcNews(){ return clubNews("Liverpool"); }
+const newsWrap=team=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${clubNews(team)}</div></div>`;
 /* ---- wiring ---- */
 function lfcWrap(tab,plBody,D,S,team){
   if(!LFCX||!LFCH) lfcLoad();
@@ -1089,8 +1092,8 @@ function tsChart(team){
 
 /* ---------- club page tabs (shared by Squads + Scotland) ---------- */
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
-const FM_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Team Style"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
-const SPFL_TABS=[["overview","Overview"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+const FM_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Team Style"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+const SPFL_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
 const FM_TAB={squads:"squad",spfl:"squad"};
 (function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&m[2]==="style") m[2]="tactics"; if(m&&LFC_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
 function tabBar(view){ return `<div class="fm-tabs" role="tablist">`+fmTabsFor(view).map(([k,l])=>`<div class="fm-tab${FM_TAB[view]===k?' on':''}" role="tab" tabindex="0" onclick="fmTab('${view}','${k}')" onkeydown="if(event.key==='Enter')fmTab('${view}','${k}')">${l}</div>`).join("")+`</div>`; }
@@ -1189,6 +1192,7 @@ function renderSquad(){
   const f2=v=>v==null?'–':(+v).toFixed(2);
   function plBody(){
     const side=`<div class="fm-side">${fmPanel("Top performers",`<div class="sh">Goals</div>${top("g",p=>`${p.g} <small>(xG ${p.xg!=null?p.xg.toFixed(2):'–'})</small>`)}<div class="sh">Assists</div>${top("a",p=>`${p.a} <small>(xA ${p.xa!=null?p.xa.toFixed(2):'–'})</small>`)}<div class="sh">Form (avg FPL pts, recent games)</div>${top("form",p=>`${p.form.toFixed(1)} <small>pts/g</small>`)}`)}</div>`;
+    if(tab==="news") return newsWrap(team);
     if(tab==="overview"){
       const used=S.filter(p=>(p.apps||0)>0).length, ts=[...S].sort((a,b)=>b.g-a.g||b.a-a.a)[0], outN=S.filter(isOut).length, dbt=inj.length-outN;
       const summ=T.pos?`${esc(team)} are <b>${ordn(T.pos)}</b> on <b>${T.pts}</b> points after ${T.P} games (${T.W} won, ${T.D} drawn, ${T.L} lost), scoring ${T.GF} and conceding ${T.GA}.`+
@@ -1445,6 +1449,7 @@ function renderSpfl(){
   const noXg='There is no xG, minutes or clean-sheet data for Scotland (no FPL-style feed exists), so this tab uses goals, shots and cards only.';
   function spBody(){
     const side=`<div class="fm-side">${fmPanel("Top performers",`<div class="sh">Goals</div>${top("g",p=>`${p.g} <small>(${d(p.sh)} shots)</small>`)}<div class="sh">Assists</div>${top("a",p=>`${p.a}`)}<div class="sh">Shots on target</div>${top("sot",p=>`${p.sot} <small>of ${d(p.sh)}</small>`)}`)}</div>`;
+    if(tab==="news") return newsWrap(team);
     if(tab==="overview"){
       const used=c.players.filter(p=>(p.apps||0)>0).length, ts=[...c.players].filter(p=>p.g).sort((a,b)=>b.g-a.g||(b.a||0)-(a.a||0))[0];
       const summ=T.pos?`${esc(team)} are <b>${ordn(T.pos)}</b> on <b>${T.pts}</b> points after ${T.P} games (${T.W} won, ${T.D} drawn, ${T.L} lost), scoring ${T.GF} and conceding ${T.GA}.`+
