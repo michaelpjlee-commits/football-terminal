@@ -226,6 +226,22 @@ body.v-sentiment #view-sentiment{display:block}
 .st-fresh{font-family:var(--mono);font-size:12px;color:var(--green);margin:2px 0 12px;letter-spacing:.3px;text-shadow:0 0 6px rgba(0,255,156,.35)}.st-fresh .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);margin-right:7px;vertical-align:1px;animation:stpulse 2s ease-in-out infinite}.st-fresh .due{color:var(--gold);text-shadow:0 0 6px rgba(255,201,64,.4)}.st-fresh .muted{text-shadow:none}@keyframes stpulse{0%,100%{opacity:1}50%{opacity:.25}}
 .st-sum li{margin:5px 0}
 /* ===== MANAGERS view ===== */
+/* all-time ladders */
+.mgl-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:1000px){.mgl-grid{grid-template-columns:1fr}}
+.mgl-h{font-family:var(--mono);font-size:13px;letter-spacing:.15em;color:var(--green);text-shadow:0 0 6px rgba(0,255,156,.5);margin:2px 0 10px}.mgl-h span{color:var(--dim);text-shadow:none;letter-spacing:.06em;font-size:11px}
+.mgl-lad{position:relative;display:flex;flex-direction:column;gap:5px;padding:0 12px;border-left:3px solid rgba(255,77,109,.8);border-right:3px solid rgba(255,77,109,.8);border-radius:3px;box-shadow:-6px 0 10px -6px rgba(255,77,109,.6),6px 0 10px -6px rgba(255,77,109,.6)}
+.mgl-r{position:relative;display:flex;align-items:center;gap:12px;padding:7px 12px 9px 8px;border:1px solid #1d3a3f;border-radius:5px;background:linear-gradient(90deg,rgba(14,28,32,.95),rgba(8,16,18,.9));overflow:hidden}
+.mgl-hex{width:36px;height:41px;flex:none;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#3a5660;position:relative}
+.mgl-hex span{position:absolute;inset:2px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:#0b171b;display:grid;place-items:center;font:700 14px var(--mono);color:var(--txt)}
+.mgl-who{width:190px;flex:none}.mgl-who b{display:block;font-size:14.5px;color:#eef6f4;white-space:nowrap}.mgl-who i{font-style:normal;font-size:11px;color:var(--dim);font-family:var(--mono)}.mgl-who em{font-style:normal;color:var(--red)}
+.mgl-rec{flex:1;min-width:0;font:11.5px/1.6 var(--mono);color:#a9bcc6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mgl-rec b{color:#e8f0f3}.mgl-rec b.w{color:var(--green)}.mgl-rec b.d{color:var(--gold)}.mgl-rec b.l{color:var(--red)}.mgl-rec span{color:#ffb3c0;font-size:10.5px}
+.mgl-v{flex:none;min-width:70px;text-align:right;font:800 22px var(--mono);color:#fff;text-shadow:0 0 10px rgba(255,77,109,.8)}.mgl-v small{font-size:12px;color:#ffc9d2}
+.mgl-bar{position:absolute;left:0;bottom:0;height:3px;background:linear-gradient(90deg,rgba(255,77,109,.9),rgba(255,77,109,.3))}
+.mgl-r.t3{border-color:rgba(255,77,109,.55);background:linear-gradient(90deg,rgba(120,8,28,.45),rgba(14,22,26,.95))}.mgl-r.t3 .mgl-hex{background:var(--red)}
+.mgl-r.g1{border-color:var(--gold);background:linear-gradient(90deg,rgba(255,201,64,.16),rgba(120,8,28,.3),rgba(14,22,26,.95))}.mgl-r.g1 .mgl-hex{background:var(--gold)}.mgl-r.g1 .mgl-hex span,.mgl-r.g1 .mgl-v{color:var(--gold)}
+.mgl-r.bot{border-style:dashed;border-color:#3a4a52}.mgl-r.bot .mgl-v{color:#9aa;text-shadow:none}
+.mgl-r.cur .mgl-who b:after{content:" ● NOW";font-size:10px;color:var(--gold)}
+
 #view-managers{display:none}
 body.v-managers #view-overview{display:none}
 body.v-managers #view-managers{display:block}
@@ -1021,7 +1037,7 @@ function lfcWrap(tab,plBody,D,S,team){
   if(tab==="overview") return wrap(`<div class="lxgrid2">${lfcHeat(D,team)}${lfcLuck(D,team)}</div>${lfcPath(D,team)}`)+base();
   if(tab==="tactics"||tab==="style") return wrap(lfcStyle(D)+lfcLineup()+lfcScanner()+lfcFormations(D));
   if(tab==="shots") return wrap(lfcShots(D));
-  if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
+  if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a><a class="lxbtn" href="#managers" onclick="return mgLadderJump()">★ ALL-TIME LADDER · WINNING MACHINES v SILVERWARE KINGS ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
   if(tab==="fixtures") return wrap(`${lfcPath(D,team)}${lfcHeat(D,team)}`)+base();
   return base();
 }
@@ -1582,6 +1598,32 @@ const mgYears=r=>{ const a=(r.first||"").slice(-4), b=r.cur?"now":(r.last||"").s
 function mgSetScope(s){ MG_SCOPE=s; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); }
 function mgSort(k){ MG_SORT = MG_SORT.k===k ? {k,dir:-MG_SORT.dir} : {k,dir:(k==="order"||k==="name"||k==="avgFin"||k==="L"||k==="GA"||k==="gapg")?1:-1}; renderManagers(); }
 function mgPct(v){ return v==null?"–":(+v).toFixed(1)+"%"; }
+
+/* ---------- ALL-TIME LADDERS (per club; add MG_LADDERS.<club> to roll out) ---------- */
+const MG_LADDERS={"lfc": {"updated": "27 Oct 2026", "min": 50, "rows": [{"n": "William E. Barclay", "y": "1892–95", "P": 91, "W": 52, "D": 17, "L": 22, "t": {}}, {"n": "John McKenna", "y": "1895–96", "P": 36, "W": 25, "D": 3, "L": 8, "t": {}}, {"n": "Tom Watson", "y": "1896–1915", "P": 742, "W": 329, "D": 141, "L": 272, "t": {"LG": 2}}, {"n": "George Patterson", "y": "1918–19 · 1928–36", "P": 384, "W": 144, "D": 87, "L": 153, "t": {}}, {"n": "David Ashworth", "y": "1919–23", "P": 139, "W": 70, "D": 40, "L": 29, "t": {"LG": 1}}, {"n": "Matt McQueen", "y": "1923–28", "P": 229, "W": 93, "D": 60, "L": 76, "t": {"LG": 1}}, {"n": "George Kay", "y": "1936–51", "P": 357, "W": 142, "D": 93, "L": 122, "t": {"LG": 1}}, {"n": "Don Welsh", "y": "1951–56", "P": 232, "W": 81, "D": 58, "L": 93, "t": {}}, {"n": "Phil Taylor", "y": "1956–59", "P": 150, "W": 76, "D": 32, "L": 42, "t": {}}, {"n": "Bill Shankly", "y": "1959–74", "P": 783, "W": 407, "D": 198, "L": 178, "t": {"LG": 3, "FA": 2, "UC": 1}}, {"n": "Bob Paisley", "y": "1974–83", "P": 535, "W": 308, "D": 131, "L": 96, "t": {"LG": 6, "LC": 3, "EC": 3, "UC": 1, "SC": 1}}, {"n": "Joe Fagan", "y": "1983–85", "P": 131, "W": 71, "D": 36, "L": 24, "t": {"LG": 1, "LC": 1, "EC": 1}}, {"n": "Kenny Dalglish", "y": "1985–91 · 2011–12", "P": 381, "W": 222, "D": 95, "L": 64, "t": {"LG": 3, "FA": 2, "LC": 1}}, {"n": "Graeme Souness", "y": "1991–94", "P": 157, "W": 66, "D": 45, "L": 46, "t": {"FA": 1}}, {"n": "Roy Evans", "y": "1994–98", "P": 226, "W": 117, "D": 56, "L": 53, "t": {"LC": 1}}, {"n": "Gérard Houllier", "y": "1998–2004", "P": 307, "W": 160, "D": 73, "L": 74, "t": {"FA": 1, "LC": 2, "UC": 1, "SC": 1}}, {"n": "Rafael Benítez", "y": "2004–10", "P": 350, "W": 194, "D": 77, "L": 79, "t": {"FA": 1, "EC": 1, "SC": 1}}, {"n": "Roy Hodgson", "y": "2010–11", "P": 31, "W": 13, "D": 9, "L": 9, "t": {}}, {"n": "Brendan Rodgers", "y": "2012–15", "P": 166, "W": 83, "D": 41, "L": 42, "t": {}}, {"n": "Jürgen Klopp", "y": "2015–24", "P": 491, "W": 299, "D": 109, "L": 83, "t": {"LG": 1, "FA": 1, "LC": 2, "EC": 1, "SC": 1, "CWC": 1}}, {"n": "Arne Slot", "y": "2024–26", "P": 113, "W": 66, "D": 19, "L": 28, "t": {"LG": 1}}, {"n": "Andoni Iraola", "y": "2026– (current)", "P": 12, "W": 8, "D": 3, "L": 1, "t": {}, "cur": 1}], "rules": "<b>Win rate</b> = wins ÷ competitive games; penalty shoot-outs count as draws. Minimum 50 games to make the Winning Machines ladder (shorter spells listed underneath). Caretakers left out; managers with two spells (Patterson, Dalglish) combined into one rung. <b>Major trophies</b> = LG league title · FA FA Cup · LC League Cup · EC European Cup/Champions League · UC UEFA Cup/Europa League · SC UEFA Super Cup · CWC Club World Cup. Charity/Community Shields, Second Division and Lancashire League titles not counted. Trophy ties split by win rate. The current manager's record updates live after every game."}};
+const MG_LKEYS=[["LG","League titles"],["FA","FA Cups"],["LC","League Cups"],["EC","European Cups / Champions Leagues"],["UC","UEFA Cups"],["SC","UEFA Super Cups"],["CWC","Club World Cups"]];
+let MG_LJUMP=/ladder/.test(location.hash);
+function mgLadders(D){
+  const LD=MG_LADDERS[MG_CLUB]; if(!LD) return "";
+  if(MG_LJUMP){ MG_LJUMP=false; setTimeout(()=>{ const e=document.getElementById('mg-ladder'); if(e) e.scrollIntoView({block:'start'}); },400); }
+  const liveCur=(D.mgr||[]).find(r=>r.cur&&r.scope==="All competitions");
+  const R=LD.rows.map(r=>{ const x={...r,t:{...r.t}}; if(r.cur&&liveCur&&liveCur.name===r.n&&liveCur.P>=r.P){ x.P=liveCur.P;x.W=liveCur.W;x.D=liveCur.D;x.L=liveCur.L; MG_LKEYS.forEach(([k,col])=>{ const v=(liveCur.tro||{})[col]; if(v) x.t[k]=v; }); } x.tn=Object.values(x.t).reduce((a,b)=>a+b,0); x.wr=x.P?x.W/x.P*100:0; return x; });
+  const wr=R.filter(r=>r.P>=LD.min).sort((a,b)=>b.wr-a.wr), short=R.filter(r=>r.P<LD.min).sort((a,b)=>b.wr-a.wr);
+  const tr=[...R].sort((a,b)=>b.tn-a.tn||b.wr-a.wr);
+  const br=r=>MG_LKEYS.filter(([k])=>r.t[k]).map(([k])=>r.t[k]+" "+k).join(" · ")||"no major honours";
+  const rung=(r,i,n,mode)=>`<div class="mgl-r${i===0?' g1':i<3?' t3':''}${i===n-1?' bot':''}${r.cur?' cur':''}"><div class="mgl-hex"><span>${i+1}</span></div>
+    <div class="mgl-who"><b>${esc(r.n)}</b><i>${esc(r.y)}${i===n-1?' · <em>▼ bottom rung</em>':''}</i></div>
+    <div class="mgl-rec">P <b>${r.P}</b> · W <b class="w">${r.W}</b> · D <b class="d">${r.D}</b> · L <b class="l">${r.L}</b><br><span>${mode==='wr'?(r.tn+' major troph'+(r.tn===1?'y':'ies')):br(r)}</span></div>
+    <div class="mgl-v">${mode==='wr'?r.wr.toFixed(1)+'<small>%</small>':r.tn}</div><div class="mgl-bar" style="width:${Math.max(2,Math.min(100,mode==='wr'?(r.wr-30)/35*100:r.tn/Math.max(1,tr[0].tn)*100)).toFixed(0)}%"></div></div>`;
+  return `<div class="card p12 mgl" id="mg-ladder"><div class="ph"><h2>★ All-time ladder · win rate v silverware</h2><span class="meta">every permanent manager · all competitive games · last updated ${esc(LD.updated)}${liveCur?' (current manager live)':''}</span></div>
+   <div class="mgl-grid">
+    <div class="mgl-col"><div class="mgl-h">&gt; THE WINNING MACHINES <span>· WIN RATE · MIN ${LD.min} GAMES</span></div><div class="mgl-lad">${wr.map((r,i)=>rung(r,i,wr.length,'wr')).join("")}</div>
+      ${short.length?`<div class="legend" style="margin-top:8px">Under ${LD.min} games, not ranked: ${short.map(r=>`${esc(r.n)} (${r.P} games, ${r.wr.toFixed(1)}%${r.cur?', current':''})`).join(" · ")}</div>`:''}</div>
+    <div class="mgl-col"><div class="mgl-h">&gt; THE SILVERWARE KINGS <span>· MAJOR TROPHIES · TIES SPLIT BY WIN %</span></div><div class="mgl-lad">${tr.map((r,i)=>rung(r,i,tr.length,'tr')).join("")}</div></div>
+   </div><div class="legend" style="margin-top:10px;line-height:1.6">${LD.rules}</div></div>`;
+}
+
+function mgLadderJump(){ setView('managers'); setTimeout(()=>{ const e=document.getElementById('mg-ladder'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'}); },250); return false; }
 function renderManagers(){
   const D=LAST_D, box=$("mgrpage"); if(!D||!box) return; mgUse(D); const CF=MG_CFG[MG_CLUB];
   const clubBtns=`<nav class="views mg-scope mg-club"><span class="legend" style="margin-right:4px">CLUB</span>${Object.entries(MG_CFG).map(([k,c])=>`<button class="${k===MG_CLUB?'on':''}" onclick="mgSetClub('${k}')">${c.club}</button>`).join("")}</nav>`;
@@ -1645,6 +1687,7 @@ function renderManagers(){
     ${kpi("Most games",esc(mgShort(gMost)),`${gMost.P} games · ${esc(gMost.seasons)}`)}
     ${kpi("Longest unbeaten run",esc(mgShort(uMost)),`${uMost.urun} games without defeat`)}
   </section>
+  ${MG_SCOPE==='all'?mgLadders(D):''}
   <section class="grid panels">
     <div class="card p12"><div class="ph"><h2>Manager comparison · ${esc(SC)}</h2><span class="meta">click a column to sort · click a manager for the head-to-head</span></div>
       <div class="scroll mg-wide" style="max-height:620px"><table class="mg-table"><tr>${th}</tr>${rows}</table></div></div>
