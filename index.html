@@ -484,6 +484,8 @@ table.lxt td{text-align:center;padding:4px;border-bottom:1px solid rgba(29,233,1
 <footer id="foot">Sources: club records and public match data · Football Terminal by @tamerton</footer>
 
 <script>
+var MG_AF0=/^#managers\/united\/after-ferguson/.test(location.hash);
+
 "use strict";
 /* ===== CONFIG ===== */
 const SRC_HOST = ["https://docs","goo"+"gle","com/spread"+"she"+"ets/d/"].join(".").replace(".com/","/").replace("gle/","gle.com/");
@@ -724,7 +726,7 @@ function render(D, fetchedAt, stale){
 const MATCH_REPORTS={"8|Liverpool|Brighton":"reports/2026-10-25-liverpool-v-brighton.html"};
 /* ===== LIVERPOOL CLUB PAGE · terminal extras (Liverpool only for now) ===== */
 const LFC_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Team Style"],["shots","Shots"],["managers","Managers"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
-function fmTabsFor(view){ try{ if(view==="squads" && (($("teampick")&&$("teampick").value)||"Liverpool")==="Liverpool") return LFC_TABS; }catch(e){} return view==="spfl"?SPFL_TABS:FM_TABS; }
+function fmTabsFor(view){ try{ const tm=($("teampick")&&$("teampick").value)||"Liverpool"; if(view==="squads" && tm==="Liverpool") return LFC_TABS; if(view==="squads" && tm==="Man Utd") return UTD_TABS; }catch(e){} return view==="spfl"?SPFL_TABS:FM_TABS; }
 let LFCX=null, LFCH=null, LFCX_ERR=false, LFCX_BUSY=false;
 const LX={m:null, shotSide:"both", cur:"Man City", atA:null, atB:null};
 const LXC={red:"#ff3b5c", liv:"#ff3b5c", opp:"#3d9bff", g:"#1de9a0", y:"#ffd23f", t:"#d6ffe9", m:"#9fcfba", bg:"#050a0a"};
@@ -1093,6 +1095,7 @@ function tsChart(team){
 /* ---------- club page tabs (shared by Squads + Scotland) ---------- */
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
 const FM_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Team Style"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+const UTD_TABS=[...FM_TABS.slice(0,4),["managers","Managers"],...FM_TABS.slice(4)];
 const SPFL_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
 const FM_TAB={squads:"squad",spfl:"squad"};
 (function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&m[2]==="style") m[2]="tactics"; if(m&&LFC_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
@@ -1186,13 +1189,14 @@ function renderSquad(){
   const maxGw=Math.max(0,...D.results.map(r=>r.gw||0));
   const prov=res.some(r=>/await|provisional/i.test(r.status));
   const covered=S.filter(p=>D.values[p.id]!=null).length;
-  if(team!=="Liverpool"&&!FM_TABS.some(t=>t[0]===FM_TAB.squads)) FM_TAB.squads="squad";
+  if(team!=="Liverpool"&&!fmTabsFor("squads").some(t=>t[0]===FM_TAB.squads)) FM_TAB.squads="squad";
   const tab=FM_TAB.squads;
   const TS=(D.teams||[]).find(x=>x.team===team)||{};
   const f2=v=>v==null?'–':(+v).toFixed(2);
   function plBody(){
     const side=`<div class="fm-side">${fmPanel("Top performers",`<div class="sh">Goals</div>${top("g",p=>`${p.g} <small>(xG ${p.xg!=null?p.xg.toFixed(2):'–'})</small>`)}<div class="sh">Assists</div>${top("a",p=>`${p.a} <small>(xA ${p.xa!=null?p.xa.toFixed(2):'–'})</small>`)}<div class="sh">Form (avg FPL pts, recent games)</div>${top("form",p=>`${p.form.toFixed(1)} <small>pts/g</small>`)}`)}</div>`;
     if(tab==="news") return newsWrap(team);
+    if(tab==="managers"&&team==="Man Utd") return `<div class="fm-pb" style="padding:14px"><a class="lxbtn" href="#managers/united" onclick="MG_AF=false;MG_CLUB='united';MG_SCOPE='all';setView('managers');return false">★ OPEN THE FULL MAN UNITED MANAGERS PAGE · 1886 TO NOW ↗</a><a class="lxbtn" style="margin-top:8px" href="#managers/united/after-ferguson" onclick="return mgAfOpen()">★ AFTER FERGUSON · EVERY SEASON SINCE 1986/87, EVERY MANAGER v SIR ALEX ↗</a><div class="legend" style="margin-top:10px;line-height:1.6">Since May 2013: average finish 5.4 (Ferguson 2.9) · 1.75 points per game (2.03) · 5 major trophies in 13 seasons (28 in 27).</div></div>`;
     if(tab==="overview"){
       const used=S.filter(p=>(p.apps||0)>0).length, ts=[...S].sort((a,b)=>b.g-a.g||b.a-a.a)[0], outN=S.filter(isOut).length, dbt=inj.length-outN;
       const summ=T.pos?`${esc(team)} are <b>${ordn(T.pos)}</b> on <b>${T.pts}</b> points after ${T.P} games (${T.W} won, ${T.D} drawn, ${T.L} lost), scoring ${T.GF} and conceding ${T.GA}.`+
@@ -1584,7 +1588,7 @@ const MG_CFG={
       ["Club World Cups","Club World Cups","#00ff9c"],["Charity/Community Shields","Shields","#6b8290"],["Play-off wins","Play-offs","#8d6e63"]],
     sub:"every official game since 1892", missing:"Every manager since City joined the League in 1892 has full match data from Bluemoon-MCFC, so none are missing. Shields and the 1999 play-off are shown but not counted as major trophies.", fin:"1 = champions · below the dashed line = 2nd tier (1998-99 = 3rd tier) · part seasons = position when the spell ended", d2:true, ymax:48}};
 let MG_TROPHY_COLS=MG_CFG[MG_CLUB].trophy;
-function mgHash(){ return "#managers"+(MG_CLUB==="lfc"?"":"/"+MG_CLUB)+(MG_SCOPE==="all"?"":"/"+MG_SCOPE); }
+function mgHash(){ if(MG_CLUB==="united"&&typeof MG_AF!=="undefined"&&MG_AF) return "#managers/united/after-ferguson"; return "#managers"+(MG_CLUB==="lfc"?"":"/"+MG_CLUB)+(MG_SCOPE==="all"?"":"/"+MG_SCOPE); }
 function mgParse(t, cfg){
   const n=num, [tm,ts,tf,tg,tsrc]=cfg.tabs.map(k=>t[k]);
   return {
@@ -1612,11 +1616,11 @@ function extractManagers(t, D){
   mgUse(D);
 }
 function mgUse(D){ const s=(D.mgClubs||{})[MG_CLUB]; if(!s) return; Object.assign(D,s); MG_TROPHY_COLS=MG_CFG[MG_CLUB].trophy; }
-function mgSetClub(c){ if(c===MG_CLUB) return; MG_CLUB=c; MG_H2H=null; MG_SORT={k:"order",dir:1}; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); }
+function mgSetClub(c){ if(c===MG_CLUB&&!MG_AF) return; MG_AF=false; MG_CLUB=c; MG_H2H=null; MG_SORT={k:"order",dir:1}; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); }
 const mgLabel=r=>r.name+(r.spell?` (${r.spell.replace(" spell","")})`:"");
 const mgShort=r=>{ const s=r.name.replace("No manager (directors in charge)","No manager").replace("Roy Evans & Gérard Houllier","Evans & Houllier").split(" "); const base=s.length>1&&!/^No|Evans/.test(r.name)?s[s.length-1]:s.join(" "); return base+(r.spell?(r.spell.startsWith("1")?" I":r.spell.startsWith("2")?" II":" III"):""); };
 const mgYears=r=>{ const a=(r.first||"").slice(-4), b=r.cur?"now":(r.last||"").slice(-4); return a?(a===b?a:`${a}–${b}`):""; };
-function mgSetScope(s){ MG_SCOPE=s; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); }
+function mgSetScope(s){ MG_AF=false; MG_SCOPE=s; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); }
 function mgSort(k){ MG_SORT = MG_SORT.k===k ? {k,dir:-MG_SORT.dir} : {k,dir:(k==="order"||k==="name"||k==="avgFin"||k==="L"||k==="GA"||k==="gapg")?1:-1}; renderManagers(); }
 function mgPct(v){ return v==null?"–":(+v).toFixed(1)+"%"; }
 
@@ -1645,9 +1649,78 @@ function mgLadders(D){
 }
 
 function mgLadderJump(){ setView('managers'); setTimeout(()=>{ const e=document.getElementById('mg-ladder'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'}); },250); return false; }
+/* ---------- MAN UNITED AFTER FERGUSON (sub-view of Managers · #managers/united/after-ferguson) ---------- */
+var MG_AF=MG_AF0||/^#managers\/united\/after-ferguson/.test(location.hash);
+const AF={updated:"26 Oct 2026",
+ seasons:["86/87","87/88","88/89","89/90","90/91","91/92","92/93","93/94","94/95","95/96","96/97","97/98","98/99","99/00","00/01","01/02","02/03","03/04","04/05","05/06","06/07","07/08","08/09","09/10","10/11","11/12","12/13","13/14","14/15","15/16","16/17","17/18","18/19","19/20","20/21","21/22","22/23","23/24","24/25","25/26"],
+ ppg:[1.33,2.02,1.34,1.26,1.58,1.86,2.0,2.19,2.1,2.16,1.97,2.03,2.08,2.39,2.11,2.03,2.18,1.97,2.03,2.18,2.34,2.29,2.37,2.24,2.11,2.34,2.34,1.68,1.84,1.74,1.82,2.13,1.74,1.74,1.95,1.53,1.97,1.58,1.11,1.87],
+ pos:[11,2,11,13,6,2,1,1,2,1,1,2,1,1,1,3,1,3,3,2,1,1,1,2,1,2,1,7,4,5,6,2,6,3,2,6,3,8,15,3],
+ rows:[["86/87","Atkinson/Ferguson","11","42","14","14","14","56","1.33","—"],["87/88","Ferguson","2","40","23","12","5","81","2.02","—"],["88/89","Ferguson","11","38","13","12","13","51","1.34","—"],["89/90","Ferguson","13","38","13","9","16","48","1.26","FA Cup"],["90/91","Ferguson","6","38","16","12","10","60","1.58","Cup Winners' Cup"],["91/92","Ferguson","2","42","21","15","6","78","1.86","League Cup, UEFA Super Cup"],["92/93","Ferguson","1","42","24","12","6","84","2.00","League title"],["93/94","Ferguson","1","42","27","11","4","92","2.19","League title, FA Cup"],["94/95","Ferguson","2","42","26","10","6","88","2.10","—"],["95/96","Ferguson","1","38","25","7","6","82","2.16","League title, FA Cup"],["96/97","Ferguson","1","38","21","12","5","75","1.97","League title"],["97/98","Ferguson","2","38","23","8","7","77","2.03","—"],["98/99","Ferguson","1","38","22","13","3","79","2.08","League title, FA Cup, Champions League"],["99/00","Ferguson","1","38","28","7","3","91","2.39","League title, Intercontinental Cup"],["00/01","Ferguson","1","38","24","8","6","80","2.11","League title"],["01/02","Ferguson","3","38","24","5","9","77","2.03","—"],["02/03","Ferguson","1","38","25","8","5","83","2.18","League title"],["03/04","Ferguson","3","38","23","6","9","75","1.97","FA Cup"],["04/05","Ferguson","3","38","22","11","5","77","2.03","—"],["05/06","Ferguson","2","38","25","8","5","83","2.18","League Cup"],["06/07","Ferguson","1","38","28","5","5","89","2.34","League title"],["07/08","Ferguson","1","38","27","6","5","87","2.29","League title, Champions League"],["08/09","Ferguson","1","38","28","6","4","90","2.37","League title, League Cup, Club World Cup"],["09/10","Ferguson","2","38","27","4","7","85","2.24","League Cup"],["10/11","Ferguson","1","38","23","11","4","80","2.11","League title"],["11/12","Ferguson","2","38","28","5","5","89","2.34","—"],["12/13","Ferguson","1","38","28","5","5","89","2.34","League title"],["13/14","Moyes/Giggs","7","38","19","7","12","64","1.68","—"],["14/15","van Gaal","4","38","20","10","8","70","1.84","—"],["15/16","van Gaal","5","38","19","9","10","66","1.74","FA Cup"],["16/17","Mourinho","6","38","18","15","5","69","1.82","League Cup, Europa League"],["17/18","Mourinho","2","38","25","6","7","81","2.13","—"],["18/19","Mourinho/Solskjær","6","38","19","9","10","66","1.74","—"],["19/20","Solskjær","3","38","18","12","8","66","1.74","—"],["20/21","Solskjær","2","38","21","11","6","74","1.95","—"],["21/22","Solskjær/Carrick/Rangnick","6","38","16","10","12","58","1.53","—"],["22/23","ten Hag","3","38","23","6","9","75","1.97","League Cup"],["23/24","ten Hag","8","38","18","6","14","60","1.58","FA Cup"],["24/25","ten Hag/van Nistelrooy/Amorim","15","38","11","9","18","42","1.11","—"],["25/26","Amorim/Fletcher/Carrick","3","38","20","11","7","71","1.87","—"],["26/27 (so far)","Carrick","—","8","1","4","3","7","0.88","—"]],
+ mgr:[["Alex Ferguson (benchmark)","Nov 1986–May 2013",1500,895,338,267,59.7,"28: 13 league, 5 FA Cup, 4 League Cup, 2 Champions League, 1 Cup Winners' Cup, 1 Super Cup, 2 Club World/Intercontinental"],["David Moyes","Jul 2013–Apr 2014",51,27,9,15,52.9,"0"],["Ryan Giggs (caretaker)","Apr–May 2014",4,2,1,1,50.0,"0"],["Louis van Gaal","2014–2016",103,54,25,24,52.4,"1: FA Cup 2016"],["José Mourinho","2016–Dec 2018",144,84,32,28,58.3,"2: League Cup + Europa League 2017"],["Ole Gunnar Solskjær","Dec 2018–Nov 2021",168,91,37,40,54.2,"0"],["Michael Carrick (caretaker)","Nov–Dec 2021",3,2,1,0,66.7,"0"],["Ralf Rangnick (interim)","Dec 2021–May 2022",29,11,10,8,37.9,"0"],["Erik ten Hag","2022–Oct 2024",128,70,23,35,54.7,"2: League Cup 2023, FA Cup 2024"],["Ruud van Nistelrooy (interim)","Oct–Nov 2024",4,3,1,0,75.0,"0"],["Ruben Amorim","Nov 2024–Jan 2026",63,24,18,21,38.1,"0"],["Darren Fletcher (interim)","Jan 2026",2,0,1,1,0.0,"0"],["Michael Carrick (current)","Jan 2026–now",29,14,7,8,48.3,"0"]],
+ avg:[["Ferguson",2.9,"27 seasons (1.5 in 21 Premier League seasons)"],["Solskjær",3.7,"3 seasons: 6th, 3rd, 2nd"],["Mourinho",4.0,"2 seasons: 6th, 2nd"],["van Gaal",4.5,"2 seasons: 4th, 5th"],["ten Hag",5.5,"2 seasons: 3rd, 8th"],["Rangnick (interim)",6.0,"1 season: 6th (24 of 38 games)"],["Moyes",7.0,"1 season: 7th (34 of 38 games)"],["Amorim",9.0,"2 seasons: 15th, 3rd (20 of 38 games in 25/26)"]],
+ win:[["Ferguson",59.7],["Mourinho",58.3],["ten Hag",54.7],["Solskjær",54.2],["Moyes",52.9],["van Gaal",52.4],["Amorim",38.1]]};
+function mgAfOpen(){ MG_CLUB="united"; MG_AF=true; MG_SCOPE="all"; try{ history.replaceState(null,"","#managers/united/after-ferguson"); }catch(e){} setView('managers'); window.scrollTo(0,0); return false; }
+function mgAfClose(){ MG_AF=false; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); return false; }
+function mgAfLink(){ return MG_CLUB==="united"?`<a class="lxbtn" href="#managers/united/after-ferguson" onclick="return mgAfOpen()">★ AFTER FERGUSON · HOW UNITED FELL OFF THE PERCH, SEASON BY SEASON ↗</a>`:""; }
+function mgAfRender(box,clubBtns){
+  const credit=`<a href="https://x.com/tamerton" target="_blank" rel="noopener" class="gold">@tamerton</a>`;
+  const kpi=(lbl,val,sub,cls)=>`<div class="card kpi ${cls||''}"><div class="lbl">${lbl}</div><div class="val ${cls?'gold':'pos'}" style="font-size:22px">${val}</div><div class="sub">${sub}</div></div>`;
+  const mrows=AF.mgr.map((r,i)=>`<tr${i===0?' class="cur"':''}><td>${i===0?'<b class="gold">'+esc(r[0])+'</b>':esc(r[0])}</td><td class="mono">${esc(r[1])}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td><td class="num">${r[5]}</td><td class="num"><b>${r[6].toFixed(1)}%</b></td><td>${esc(r[7])}</td></tr>`).join("");
+  const srows=AF.rows.map((r,i)=>`<tr${i===27?' style="border-top:2px dashed #ffc940"':''}><td class="mono">${esc(r[0])}</td><td>${esc(r[1])}</td><td class="num">${r[2]==="1"?'<b class="gold">1 ★</b>':esc(r[2])}</td>${r.slice(3,8).map(x=>`<td class="num">${x}</td>`).join("")}<td class="num"><b>${r[8]}</b></td><td>${esc(r[9])}</td></tr>`).join("");
+  const li=a=>a.map(x=>`<li style="margin:4px 0">${x}</li>`).join("");
+  box.innerHTML=`${clubBtns}
+  <nav class="views mg-scope"><button onclick="return mgAfClose()">◂ All Man United managers</button><button class="on">After Ferguson</button></nav>
+  <div class="lif-head"><h2>Man United after Ferguson · 1986/87 to now</h2><span class="legend">every season since Sir Alex arrived · his 27 years are the benchmark · updated ${AF.updated} · built by ${credit}</span></div>
+  <section class="grid kpis">
+    ${kpi("Ferguson's last season","89 pts","1st · 2012/13","g")}
+    ${kpi("First season after","64 pts","7th · 2013/14 (Moyes, then Giggs)")}
+    ${kpi("Average finish","2.9 → 5.4","Ferguson 1986–2013 v everyone since")}
+    ${kpi("Points per game (league)","2.03 → 1.75","Ferguson 27 seasons v 2013/14–2025/26")}
+    ${kpi("Major trophies","28 → 5","27 seasons v 13 seasons · no league title since")}
+  </section>
+  <section class="grid panels">
+    <div class="card p12"><div class="ph"><h2>League finish · every season since 1986/87</h2><span class="meta">1st at the top · dashed = era average (Ferguson 2.9 · since 2013 5.4)</span></div><div class="chartbox tall"><canvas id="af-fin"></canvas></div></div>
+    <div class="card p12"><div class="ph"><h2>Points per game · league</h2><span class="meta">3 for a win every season, so 40- and 42-game seasons compare fairly · dashed = era average</span></div><div class="chartbox tall"><canvas id="af-ppg"></canvas></div></div>
+    <div class="card p6"><div class="ph"><h2>Average league finish by manager</h2><span class="meta">lower is better · Ferguson = benchmark</span></div><div class="chartbox tall"><canvas id="af-avg"></canvas></div>
+      <div class="legend" style="margin-top:6px;line-height:1.6">Each season goes to the manager who took most of its league games. Caretakers and interims (Giggs, Carrick 2021, van Nistelrooy, Fletcher) have no season of their own. Carrick (current) hasn't had most of a season yet. 2025/26 counts for Amorim (20 of 38), although Carrick took 39 points from the last 17.</div></div>
+    <div class="card p6"><div class="ph"><h2>Win rate by manager</h2><span class="meta">all competitions · 50+ games</span></div><div class="chartbox tall"><canvas id="af-win"></canvas></div></div>
+    <div class="card p12"><div class="ph"><h2>Manager comparison · all competitions</h2><span class="meta">Ferguson first as the benchmark</span></div>
+      <div class="scroll mg-wide"><table class="mg-table"><tr><th>Manager</th><th>In charge</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">Win %</th><th>Major trophies</th></tr>${mrows}</table></div>
+      <div class="legend" style="margin-top:6px">Records: competitive games, shoot-outs counted as draws. Shields are not counted as major trophies. Carrick was interim from 13 Jan 2026 and was made permanent on 22 May 2026.</div></div>
+    <div class="card p12"><div class="ph"><h2>Season by season</h2><span class="meta">league record · trophies from all competitions · dashed line = Ferguson retires</span></div>
+      <div class="scroll mg-wide" style="max-height:620px"><table class="mg-table"><tr><th>Season</th><th>Manager(s)</th><th class="num">Finish</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">Pts</th><th class="num">PPG</th><th>Trophies</th></tr>${srows}</table></div></div>
+    <div class="card p6"><div class="ph"><h2>Trophies &amp; Champions League</h2><span class="meta">since 2013</span></div><ul class="legend" style="font-size:12px;line-height:1.6;padding-left:18px">${li([
+      "<b>5 major trophies in 13 seasons:</b> FA Cup 2016, League Cup 2017, Europa League 2017, League Cup 2023, FA Cup 2024. No league title and no Champions League.",
+      "<b>Ferguson, for comparison:</b> 28 major trophies in 27 seasons, 13 of them league titles, all in the 21 Premier League seasons (average 83 points, 1.5 finish).",
+      "<b>Champions League qualification:</b> 7 of 13 completed seasons. Six came from top-four finishes (2015, 2018, 2020, 2021, 2023, 2026) and one from winning the Europa League in 2017. Missed in 2014, 2016, 2019, 2022, 2024 and 2025.",
+      "<b>Lowest finish:</b> 15th with 42 points in 2024/25. Ferguson's lowest was 13th, in 1989/90."])}</ul></div>
+    <div class="card p6"><div class="ph"><h2>&gt; Verdict</h2><span class="meta">analysis of the figures</span></div><ul class="legend" style="font-size:12px;line-height:1.6;padding-left:18px">${li([
+      "<b>The drop was immediate:</b> 89 points in Ferguson's final season, 64 under Moyes. No season since has beaten 81, a total Ferguson beat in 13 of his 21 Premier League seasons.",
+      "<b>Best era since:</b> Mourinho, with a 58.3% win rate, 81 points and 2nd in 2017/18, and 2 trophies including a European one. Solskjær has the best average finish (3.7) but won nothing in 168 games.",
+      "<b>Worst era:</b> Amorim, with a 38.1% win rate, 15th place and 1.11 points per game in 2024/25.",
+      "<b>What went wrong:</b> seven permanent managers and four caretakers in 13 years. Most managers had one decent season and then faded.",
+      "<b>Cup side, not title side:</b> five trophies, but the league has been out of reach.",
+      "<b>Now:</b> Carrick took 2.29 points per game over the last 17 league games of 2025/26 to finish 3rd, but 2026/27 has started with 1 win in 8 league games."])}</ul></div>
+  </section>`;
+  const n=AF.seasons.length, cut=27;
+  const era=(v1,v2)=>AF.seasons.map((_,i)=>i<cut?v1:v2);
+  const dash=(lbl,data,col)=>({label:lbl,data,borderColor:col,borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false,segment:{borderColor:c=>c.p0DataIndex===cut-1?"transparent":col}});
+  draw("af-fin",{type:"line",data:{labels:AF.seasons,datasets:[{label:"League finish",data:AF.pos,borderColor:"#ff4d6d",backgroundColor:"#ff4d6d",borderWidth:2,tension:.2,
+      pointRadius:AF.pos.map(p=>p===1?5:2.5),pointStyle:AF.pos.map(p=>p===1?"star":"circle"),pointBackgroundColor:AF.pos.map((p,i)=>i<cut?"#ffc940":"#ff4d6d")},dash("Era average",era(2.9,5.4),"#4cc9f0")]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:it=>it.datasetIndex?`Era average: ${it.raw}`:`${AF.rows[it.dataIndex][1]}: ${ordn(it.raw)} · ${AF.rows[it.dataIndex][7]} pts`}}},
+      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14,maxRotation:0}},y:{reverse:true,min:1,max:16,grid:gridOpts,ticks:{stepSize:3,callback:v=>ordn(v)}}}}});
+  draw("af-ppg",{type:"line",data:{labels:AF.seasons,datasets:[{label:"Points per game",data:AF.ppg,borderColor:"#00ff9c",backgroundColor:"rgba(0,255,156,.12)",fill:true,borderWidth:2,tension:.2,pointRadius:2.5,pointBackgroundColor:AF.ppg.map((_,i)=>i<cut?"#ffc940":"#ff4d6d")},dash("Era average",era(2.03,1.75),"#4cc9f0")]},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:it=>it.datasetIndex?`Era average: ${it.raw}`:`${AF.rows[it.dataIndex][1]}: ${(+it.raw).toFixed(2)} ppg`}}},
+      scales:{x:{grid:{display:false},ticks:{maxTicksLimit:14,maxRotation:0}},y:{grid:gridOpts,min:1,max:2.5,title:{display:true,text:"points per game"}}}}});
+  draw("af-avg",{type:"bar",data:{labels:AF.avg.map(r=>r[0]),datasets:[{label:"Average finish",data:AF.avg.map(r=>r[1]),backgroundColor:AF.avg.map((r,i)=>i===0?"#ffc940":"rgba(255,77,109,.8)"),borderRadius:3}]},
+    options:{indexAxis:"y",plugins:{legend:{display:false},datalabels:barLabels(v=>(+v).toFixed(1)),tooltip:{callbacks:{afterLabel:it=>AF.avg[it.dataIndex][2]}}},scales:{x:{grid:gridOpts,beginAtZero:true,max:10},y:{grid:{display:false},ticks:{color:C.txt,autoSkip:false,font:{size:10}}}}}});
+  draw("af-win",{type:"bar",data:{labels:AF.win.map(r=>r[0]),datasets:[{label:"Win %",data:AF.win.map(r=>r[1]),backgroundColor:AF.win.map((r,i)=>i===0?"#ffc940":"rgba(76,201,240,.8)"),borderRadius:3}]},
+    options:{indexAxis:"y",plugins:{legend:{display:false},datalabels:barLabels(v=>(+v).toFixed(1)+"%")},scales:{x:{grid:gridOpts,beginAtZero:true,max:70},y:{grid:{display:false},ticks:{color:C.txt,autoSkip:false,font:{size:10}}}}}});
+}
 function renderManagers(){
   const D=LAST_D, box=$("mgrpage"); if(!D||!box) return; mgUse(D); const CF=MG_CFG[MG_CLUB];
   const clubBtns=`<nav class="views mg-scope mg-club"><span class="legend" style="margin-right:4px">CLUB</span>${Object.entries(MG_CFG).map(([k,c])=>`<button class="${k===MG_CLUB?'on':''}" onclick="mgSetClub('${k}')">${c.club}</button>`).join("")}</nav>`;
+  if(MG_CLUB==="united"&&MG_AF){ mgAfRender(box,clubBtns); return; }
   if(!D.mgr||!D.mgr.length){ box.innerHTML=clubBtns+`<div class="card"><div class="legend">${CF.club} manager data is loading or not available yet.</div></div>`; return; }
   if(false){ box.innerHTML=`<div class="card"><div class="legend">Manager data is loading or not available yet.</div></div>`; return; }
   const sc=MG_SCOPES.find(s=>s[0]===MG_SCOPE)||MG_SCOPES[0], SC=sc[1];
@@ -1708,6 +1781,7 @@ function renderManagers(){
     ${kpi("Most games",esc(mgShort(gMost)),`${gMost.P} games · ${esc(gMost.seasons)}`)}
     ${kpi("Longest unbeaten run",esc(mgShort(uMost)),`${uMost.urun} games without defeat`)}
   </section>
+  ${mgAfLink()}
   ${MG_SCOPE==='all'?mgLadders(D):''}
   <section class="grid panels">
     <div class="card p12"><div class="ph"><h2>Manager comparison · ${esc(SC)}</h2><span class="meta">click a column to sort · click a manager for the head-to-head</span></div>
