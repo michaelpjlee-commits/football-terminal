@@ -1076,20 +1076,65 @@ function tsPage(team){
     ["Shots / on target",`${s.shots} / ${s.sot} (${(s.shots/s.P).toFixed(1)} a game)`],["Shots from inside the box",`${s.boxShots} of ${s.boxShots+s.outShots}`],["Headed shots",`${s.head} of ${s.boxShots+s.outShots}`],
     ["Ball wins",`${s.tklw+s.int} (${s.tklw} tackles won, ${s.int} interceptions)`],["Shots faced",`${(s.shotsA/s.P).toFixed(1)} a game (${s.sotA} on target)`],["Fouls committed",`${(s.fouls/s.P).toFixed(1)} a game`]]);
   return wrap(`<div class="lxgrid2">${lxPanel("TEAM.STYLE · PER GAME · LEAGUE RANK",`<div class="stg">${tiles}</div>`,code)}
-   ${lxPanel("STYLE.RADAR",`<div class="lxrad"><canvas id="ts-radar"></canvas></div><div class="lxnote">Each spoke runs from the lowest club in the league (centre) to the highest (edge). <span style="color:${LXC.g}">■ ${esc(team)}</span> <span style="color:${LXC.m}">■ league average</span></div>`)}</div>
-   ${lxPanel("STYLE.DETAIL",extra+`<div class="lxnote">League games only, ${s.P} played. Ball wins = tackles won plus interceptions. Set-piece goals include penalties. Late goals = 76th minute onwards, including stoppage time. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`)}
-   <div class="lxnote" style="margin-top:0">Coming next to Team Style: the latest line-up board and a "plays most like" comparison.</div>`);
+   ${lxPanel("STYLE.RADAR",`<div class="lxrad"><canvas id="ts-radar"></canvas></div><div class="lxnote">Each spoke runs from the lowest club in the league (centre) to the highest (edge). <span style="color:${LXC.g}">■ ${esc(team)}</span> <span style="color:${LXC.opp}">■ ${esc(lxSimilar(ST,team)[0][0])}</span> <span style="color:${LXC.m}">■ league average</span></div>`)}</div>
+   <div class="lxgrid2">${tsLike(team)}
+   ${lxPanel("STYLE.DETAIL",extra+`<div class="lxnote">League games only, ${s.P} played. Ball wins = tackles won plus interceptions. Set-piece goals include penalties. Late goals = 76th minute onwards, including stoppage time. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`)}</div>
+   ${tsLineup(team)}`);
 }
 function tsChart(team){
   if(!LFCX||!$("ts-radar")||typeof Chart==="undefined") return;
   const ST=LFCX.style, T=Object.keys(ST); if(!ST[team]) return;
   const nr=(f,v)=>{ const a=T.map(x=>f(ST[x])), lo=Math.min(...a), hi=Math.max(...a); return hi>lo?100*(v-lo)/(hi-lo):50; };
-  const mean=f=>T.reduce((a,x)=>a+f(ST[x]),0)/T.length, c=LXC.g;
+  const mean=f=>T.reduce((a,x)=>a+f(ST[x]),0)/T.length, c=LXC.g, B=lxSimilar(ST,team)[0][0];
   try{ draw("ts-radar",{type:"radar",data:{labels:LX_AX.map(a=>a[1]),datasets:[
     {label:team,data:LX_AX.map(a=>nr(a[3],a[3](ST[team]))),borderColor:c,backgroundColor:c+"33",pointBackgroundColor:c,borderWidth:2,pointRadius:3},
+    {label:B,data:LX_AX.map(a=>nr(a[3],a[3](ST[B]))),borderColor:LXC.opp,backgroundColor:LXC.opp+"22",pointBackgroundColor:LXC.opp,borderWidth:2,pointRadius:2},
     {label:"League average",data:LX_AX.map(a=>nr(a[3],mean(a[3]))),borderColor:LXC.m,backgroundColor:"transparent",borderDash:[4,4],borderWidth:1.5,pointRadius:0}]},
-    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>{ const a=LX_AX[x.dataIndex], v=x.datasetIndex?mean(a[3]):a[3](ST[team]); return `${x.dataset.label}: ${(Math.round(v*10)/10)}${a[2]==="%"?"%":a[2]?" "+a[2]:""}`; }}}},
+    options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>{ const a=LX_AX[x.dataIndex], v=x.datasetIndex===2?mean(a[3]):a[3](ST[x.datasetIndex?B:team]); return `${x.dataset.label}: ${(Math.round(v*10)/10)}${a[2]==="%"?"%":a[2]?" "+a[2]:""}`; }}}},
       scales:{r:{min:0,max:100,ticks:{display:false,stepSize:25},grid:{color:"rgba(29,233,160,.15)"},angleLines:{color:"rgba(29,233,160,.2)"},pointLabels:{color:LXC.t,font:{size:10.5}}}}}}); }catch(e){ console.warn(e); }
+}
+
+/* ===== TEAM STYLE day 2 · line-up board for every PL club ===== */
+let TSL=null, TSL_BUSY=false, TSL_ERR=false;
+function tsLoad(){
+  if(TSL||TSL_BUSY) return; TSL_BUSY=true;
+  fetch("data/lineups.json",{cache:"no-store"}).then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); }).then(j=>{ TSL=j; TSL_ERR=false; })
+   .catch(e=>{ console.warn("lineups",e); TSL_ERR=true; })
+   .finally(()=>{ TSL_BUSY=false; if(document.body.classList.contains("v-squads")&&FM_TAB.squads==="tactics") renderSquad(); });
+}
+function tsGlow(hex){ const n=parseInt(hex.slice(1),16), r=n>>16, g=(n>>8)&255, b=n&255, L=(0.2126*r+0.7152*g+0.0722*b)/255;
+  if(L>=0.28) return hex; const k=L<0.12?0.55:0.35, m=c=>Math.round(c+(255-c)*k).toString(16).padStart(2,"0"); return "#"+m(r)+m(g)+m(b); }
+function tsLineup(team){
+  if(!TSL){ tsLoad(); return lxPanel("LINEUP.SYS",TSL_ERR?'<div class="lxnote">This panel is temporarily unavailable. It will come back on the next refresh.</div>':lxWait()); }
+  const g=(TSL.clubs||{})[team]; if(!g||!g.ro||!(g.ro.xi||[]).length) return lxPanel("LINEUP.SYS",'<div class="lxnote">No league line-up for this club yet.</div>');
+  const C=tsGlow((CLUBS[team]||["","#1de9a0"])[1]), home=g.home===team, opp=home?g.away:g.home, ro=g.ro, code=lxCode(team), oc=lxCode(opp);
+  const gf=home?g.hg:g.ag, ga=home?g.ag:g.hg, lay=lxLayout(ro.xi||[],ro.f);
+  const node=(pt)=>({p,x,y})=>{ const [cx,cy]=pt.P(x,y), r=22, pts=[...Array(6)].map((_,q)=>{const a=(-90+q*60)*Math.PI/180; return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`;}).join(" ");
+    const note=[p.g?("⚽".repeat(Math.min(p.g,3))):"", p.a?"A".repeat(Math.min(p.a,3)):"", p.off?`▼${p.off}`:""].filter(Boolean).join(" ");
+    return `<g class="lxn"><polygon points="${pts}" fill="${C}2e" stroke="${C}" stroke-width="2.5" style="filter:drop-shadow(0 0 7px ${C})"/>
+     <text x="${cx}" y="${cy+6}" fill="#fff" font-size="17" font-weight="700" text-anchor="middle">${esc(p.no)}</text>
+     <text x="${cx}" y="${cy+r+16}" fill="${LXC.t}" font-size="13" text-anchor="middle" stroke="${LXC.bg}" stroke-width="4" paint-order="stroke">${esc(String(p.s).toUpperCase())}</text>
+     ${note?`<text x="${cx}" y="${cy+r+30}" fill="${LXC.y}" font-size="11" text-anchor="middle" stroke="${LXC.bg}" stroke-width="3" paint-order="stroke">${esc(note)}</text>`:''}
+     ${p.yc?`<rect x="${cx+r-6}" y="${cy-r-2}" width="8" height="11" rx="1" fill="${LXC.y}"/>`:''}${p.rc?`<rect x="${cx+r-6}" y="${cy-r-2}" width="8" height="11" rx="1" fill="${LXC.red}"/>`:''}</g>`; };
+  const mk=(pt,v)=>`<svg class="lxsvg" viewBox="0 0 ${pt.W} ${pt.H}" role="img" aria-label="${esc(team)} starting line-up">${pt.svg}${(v?lay.map(o=>({...o,x:o.x<=6?o.x:6+(o.x-6)*1.8})):lay).map(node(pt)).join("")}<text x="${pt.W-12}" y="18" fill="${LXC.g}" font-size="12" text-anchor="end" letter-spacing="2">${v?"ATTACK ▲":"ATTACK ▶▶"}</text></svg>`;
+  const svg=`<div class="lxwide">${mk(lxPitch(9,"tslp"),0)}</div><div class="lxnarrow">${mk(lxPitchV(7.4,"tslpv"),1)}</div>`;
+  const gl=t=>g.goals.filter(x=>x.team===t).map(x=>`${esc(x.type==="og"?x.p.replace(/ \(og\)$/," OG"):short_(x.p))} ${lxMin(Math.round(x.m))}${x.type==="pen"?" (pen)":""}`).join(" · ");
+  const mine=gl(team)||"–", theirs=gl(opp);
+  const subs=(ro.subs||[]).slice().sort((a,b)=>(parseFloat(a.on)||45)-(parseFloat(b.on)||45)).map(s=>`<div class="lxsu"><span style="color:${LXC.g}">▲</span> ${esc(s.no)} ${esc(s.s)} <span style="color:${LXC.red}">▼</span> ${esc(s.for||"")} <span class="lxdim">${esc(s.on||"")}</span></div>`).join("")||'<div class="lxdim">None</div>';
+  const unused=(ro.unused||[]).map(s=>esc(s.s)).join(", ")||"–";
+  const pick=`<select class="lxsel" aria-label="Pick a club" onchange="$('teampick').value=this.value;pickTeam()">${Object.keys(CLUBS).sort().map(t=>`<option value="${esc(t)}"${t===team?" selected":""}>${esc(t)}</option>`).join("")}</select>`;
+  const res=gf>ga?"W":gf===ga?"D":"L";
+  return `<section class="lx lxlu" id="ts-lineup"><div class="lxhd"><span class="lxp">&gt; LINEUP.SYS · <span style="color:${C};text-shadow:0 0 10px ${C}">${esc(team.toUpperCase())}</span> · ${esc(ro.f||"")}</span><span class="lxcur2"></span>${pick}</div>
+   <div class="lxlug"><div class="lxpitch">${svg}</div><div class="lxside"><div class="lxk">LAST LEAGUE MATCH</div><div class="lxft">FT <span style="color:${C}">${gf}</span>-<span style="color:${LXC.opp}">${ga}</span> <span class="lxdim2">${home?esc(code)+" v "+esc(oc):esc(oc)+" v "+esc(code)}</span> <span class="wdl ${res}">${res}</span></div>
+   <div class="lxdim">${mine}${theirs?`<br><span style="color:${LXC.opp}">${esc(oc)}:</span> ${theirs}`:''}</div><div class="lxdim">${esc(g.venue||"")} · ${lxDY(g.date)}</div>
+   <div class="lxk">SUBS USED</div>${subs}<div class="lxk">UNUSED</div><div class="lxdim">${unused}</div>
+   <div class="lxk">STATUS</div><div class="lxdim">XI LOADED · ${(ro.xi||[]).length}/11 NODES<br>SHAPE ${esc(ro.f||"–")} ✔</div></div></div>
+   <div class="lxnote">Starting XI as named for the club's most recent league match, set out in the listed formation. ⚽ goal · A assist · ▼ subbed off · cards shown on the marker. Use the menu to switch club.</div></section>`;
+}
+function tsLike(team){
+  const ST=LFCX.style, sim=lxSimilar(ST,team);
+  return lxPanel("PLAYS.MOST.LIKE",sim.slice(0,3).map(([t,p],i)=>`<div class="sim${i===0?' on':''}"><span class="simn">${esc(t.toUpperCase())}</span><span class="simb"><i style="width:${p}%"></i></span><span class="simv">${p}%</span></div>`).join("")+
+    `<div class="lxdim" style="margin-top:6px">Least alike: ${esc(sim[sim.length-1][0])}</div><div class="lxnote">Compares possession, shots for and against, shots on target, pass accuracy, crosses, long balls, ball wins, corners and shots from inside the box against every other league club. 100% = identical style, 0% = the least alike club. The closest match is drawn in blue on the radar.</div>`);
 }
 
 /* ---------- club page tabs (shared by Squads + Scotland) ---------- */
