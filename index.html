@@ -725,7 +725,7 @@ function render(D, fetchedAt, stale){
 /* ---------- match reports (gw|home|away -> page) ---------- */
 const MATCH_REPORTS={"8|Liverpool|Brighton":"reports/2026-10-25-liverpool-v-brighton.html"};
 /* ===== LIVERPOOL CLUB PAGE · terminal extras (Liverpool only for now) ===== */
-const LFC_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Team Style"],["shots","Shots"],["managers","Managers"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
+const LFC_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Team Style"],["shots","Shots"],["xi","Strongest XI"],["managers","Managers"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
 function fmTabsFor(view){ try{ const tm=($("teampick")&&$("teampick").value)||"Liverpool"; if(view==="squads" && tm==="Liverpool") return LFC_TABS; if(view==="squads" && tm==="Man Utd") return UTD_TABS; }catch(e){} return view==="spfl"?SPFL_TABS:FM_TABS; }
 let LFCX=null, LFCH=null, LFCX_ERR=false, LFCX_BUSY=false;
 const LX={m:null, shotSide:"both", cur:"Man City", atA:null, atB:null};
@@ -1050,6 +1050,27 @@ function clubNews(team){
 function lfcNews(){ return clubNews("Liverpool"); }
 const newsWrap=team=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${clubNews(team)}</div></div>`;
 /* ---- wiring ---- */
+/* ---- strongest XI vs actual XI · 2026/27 ---- */
+const LXI={best:[["GK","Becker",15.5],["DEF","Araujo",19.7],["DEF","Jacquet",18.9],["DEF","Van Dijk",16.9],["DEF","Kerkez",13.9],["MID","Gakpo",24.3],["MID","Muñoz",22.0],["MID","Wirtz",21.3],["MID","Szoboszlai",20.3],["MID","Gravenberch",18.5],["FWD","Isak",31.7]],
+ now:[["GK","Becker",15.5],["DEF","Araujo",19.7],["DEF","Jacquet",18.9],["DEF","Van Dijk",16.9],["DEF","Kerkez",13.9],["MID","Gakpo",24.3],["MID","Wirtz (75% fit · ankle)",21.3],["MID","Gravenberch",18.5],["MID","Barcola",16.5],["MID","Mac Allister",15.0],["FWD","Isak",31.7]],
+ g:[[1,"23 Aug","Newcastle (A)","2-2","D",9,93.9,"Araujo, Muñoz","Frimpong, Ngumoha"],[2,"29 Aug","Nott'm Forest (H)","2-2","D",9,95.1,"Araujo, Gravenberch","Frimpong, Mac Allister"],[3,"4 Sep","Ipswich (A)","2-0","W",10,98.4,"Gravenberch","Mac Allister"],[4,"12 Sep","Fulham (H)","0-0","D",9,96.4,"Kerkez, Gakpo","Tsimikas, Barcola"],[5,"20 Sep","Bournemouth (A)","1-0","W",9,96.0,"Muñoz, Gravenberch","Mac Allister, Barcola"],[6,"11 Oct","Man City (H)","0-3","L",8,88.3,"Gakpo, Szoboszlai, Isak","Mac Allister, Koumas, Barcola"],[7,"17 Oct","Brentford (A)","2-1","W",9,94.9,"Gakpo, Gravenberch","Mac Allister, Barcola"],[8,"25 Oct","Brighton (H)","2-0","W",9,95.2,"Muñoz, Szoboszlai","Mac Allister, Barcola"]]};
+function lfcXI(){
+  const rc=r=>r==="W"?"#1de9a0":r==="L"?"#ff5c7a":"#f5c542";
+  const xt=(L,tot,h)=>`<table class="mg-table" style="width:100%"><thead><tr><th style="text-align:left">${h}</th><th>Pos</th><th style="text-align:right">Rating/90</th></tr></thead><tbody>${L.map(p=>`<tr><td>${esc(p[1])}</td><td>${p[0]}</td><td style="text-align:right">${p[2].toFixed(1)}</td></tr>`).join("")}<tr><td><b>Total</b></td><td></td><td style="text-align:right"><b>${tot}</b></td></tr></tbody></table>`;
+  const kpi=(l,v,s)=>`<div class="st"><div class="stl">${l}</div><div class="stv">${v}</div><div class="str">${s}</div></div>`;
+  const rows=LXI.g.map(g=>`<tr><td>GW${g[0]}</td><td>${g[1]}</td><td style="text-align:left">${esc(g[2])}</td><td>${g[3]}</td><td style="color:${rc(g[4])};font-weight:700">${g[4]}</td><td>${g[5]}/11</td><td>${g[6].toFixed(1)}%</td><td style="text-align:left">${esc(g[7])}</td><td style="text-align:left">${esc(g[8])}</td></tr>`).join("");
+  return lxPanel("STRONGEST.XI v ACTUAL.XI · 2026/27",`<div class="lxgrid2" style="margin-bottom:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">${kpi("AVG OVERLAP","9.0<small>/11</small>","with the strongest XI")}${kpi("AVG XI STRENGTH","94.8<small>%</small>","of the strongest XI's rating")}${kpi("TOP-4 STRONGEST XIs","2.50<small>ppg</small>","W3 D1 L0")}${kpi("BOTTOM-4 XIs","1.25<small>ppg</small>","W1 D2 L1")}</div>
+  <div class="lxnote" style="margin-bottom:10px">Each player is rated by the Premier League's official bonus-points rating per 90 minutes (min. 270 league minutes). The rating counts about 30 actions and treats each position differently: saves and clean sheets for goalkeepers; clean sheets, tackles, clearances and blocks for defenders; passing, chances and goals for midfielders; goals, assists and shots for forwards. The strongest XI takes the best-rated player in each slot of Liverpool's most-used shape (1 GK, 4 DEF, 5 MID, 1 FWD; started in 7 of 8 games). An XI's strength is its 11 starters' total rating as a % of the strongest XI's total.</div>
+  <div class="lxgrid2"><div>${xt(LXI.best,"223.0","IF ALL FIT")}</div><div>${xt(LXI.now,"212.2 (95.2%)","AVAILABLE NOW")}</div></div>
+  <div class="lxnote">"Available now" leaves out Szoboszlai (hamstring, no return date) and Muñoz (knee, 25% chance), using injury news as of 28 Oct.</div>
+  <div class="chartbox tall" style="margin-top:12px"><canvas id="lx-xi"></canvas></div>
+  <div style="overflow-x:auto;margin-top:10px"><table class="mg-table" style="width:100%"><thead><tr><th>GW</th><th>Date</th><th style="text-align:left">Opponent</th><th>Score</th><th>Res</th><th>Overlap</th><th>Strength</th><th style="text-align:left">Missing from strongest XI</th><th style="text-align:left">Started instead</th></tr></thead><tbody>${rows}</tbody></table></div>
+  <div class="lxnote">Strongest v most rotated: the 4 strongest XIs (avg 96.5%) took 10 pts, 2.50 per game. The 4 weakest (avg 93.1%) took 5 pts, 1.25 per game. 10/11 overlap: 3.00 ppg (1 game). 9/11: 2.00 ppg (6 games). 8/11: 0.00 ppg (1 game). Only 8 games, so treat this with care: the opponent matters as much as the XI, and ratings partly reflect results. Reasons for past absences aren't recorded, only current injuries.</div>
+  <div class="lxnote"><b>Verdict:</b> Iraola rarely rotates. Becker, Van Dijk, Jacquet and Wirtz started all 8 games, and Isak and Kerkez started 7. The one heavy rotation, without Isak, Gakpo and Szoboszlai, came in the 0-3 home loss to City (88.3%). Midfield is the usual gap: Mac Allister or Barcola come in, rated 3-7 lower per 90. With Szoboszlai and Muñoz out, the best XI available now is 95.2%, in line with the norm. · by @tamerton</div>`,"GW1-8");
+}
+function lfcXIChart(){ const G=LXI.g, rc=r=>r==="W"?"#1de9a0":r==="L"?"#ff5c7a":"#f5c542";
+  draw("lx-xi",{type:"bar",data:{labels:G.map(g=>`GW${g[0]} ${g[2].replace(/ \(.\)/,"")} ${g[3]} ${g[4]}`),datasets:[{label:"XI strength %",data:G.map(g=>g[6]),backgroundColor:G.map(g=>rc(g[4])),borderWidth:0}]},
+   options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{color:"#e6fff5",anchor:"end",align:"end",formatter:v=>v.toFixed(1)+"%"},tooltip:{callbacks:{label:c=>`${c.raw}% · ${G[c.dataIndex][5]}/11 overlap`}}},scales:{y:{min:80,max:100,ticks:{color:"#7fa89a",callback:v=>v+"%"},grid:{color:"rgba(127,168,154,.12)"}},x:{ticks:{color:"#7fa89a",maxRotation:40,minRotation:0},grid:{display:false}}}}}); }
 function lfcWrap(tab,plBody,D,S,team){
   if(!LFCX||!LFCH) lfcLoad();
   const base=()=>plBody()||"";
@@ -1058,11 +1079,12 @@ function lfcWrap(tab,plBody,D,S,team){
   if(tab==="tactics"||tab==="style") return wrap(lfcStyle(D)+lfcLineup()+lfcScanner()+lfcFormations(D));
   if(tab==="news") return wrap(lfcNews());
   if(tab==="shots") return wrap(lfcShots(D));
+  if(tab==="xi") return wrap(lfcXI());
   if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a><a class="lxbtn" href="#managers" onclick="return mgLadderJump()">★ ALL-TIME LADDER · WINNING MACHINES v SILVERWARE KINGS ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
   if(tab==="fixtures") return wrap(`${lfcPath(D,team)}${lfcHeat(D,team)}`)+base();
   return base();
 }
-function lfcAfter(tab){ try{ if(tab==="style"||tab==="tactics") lfcStyleChart(); if(tab==="managers") lfcMgrCharts(); }catch(e){ console.warn(e); } }
+function lfcAfter(tab){ try{ if(tab==="style"||tab==="tactics") lfcStyleChart(); if(tab==="managers") lfcMgrCharts(); if(tab==="xi") lfcXIChart(); }catch(e){ console.warn(e); } }
 
 /* ===== TEAM STYLE · every PL club (style stats + radar) ===== */
 function tsPage(team){
@@ -1143,10 +1165,10 @@ const FM_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],
 const UTD_TABS=[...FM_TABS.slice(0,4),["managers","Managers"],...FM_TABS.slice(4)];
 const SPFL_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Tactics"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
 const FM_TAB={squads:"squad",spfl:"squad"};
-(function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&m[2]==="style") m[2]="tactics"; if(m&&LFC_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
+(function(){ const m=location.hash.match(/^#(squads|spfl|scotland)\/[^\/]*\/(\w+)/); if(m&&m[2]==="style") m[2]="tactics"; if(m&&m[2]==="strongest") m[2]="xi"; if(m&&LFC_TABS.some(t=>t[0]===m[2])) FM_TAB[m[1]==="squads"?"squads":"spfl"]=m[2]; })();
 function tabBar(view){ return `<div class="fm-tabs" role="tablist">`+fmTabsFor(view).map(([k,l])=>`<div class="fm-tab${FM_TAB[view]===k?' on':''}" role="tab" tabindex="0" onclick="fmTab('${view}','${k}')" onkeydown="if(event.key==='Enter')fmTab('${view}','${k}')">${l}</div>`).join("")+`</div>`; }
 function fmHash(view){ const sel=$(view==="squads"?"teampick":"spflpick"); if(!sel||!sel.value) return;
-  const h=`#${view}/${encodeURIComponent(sel.value)}/${FM_TAB[view]}`; if(location.hash!==h) try{ history.replaceState(null,"",h); }catch(e){ location.hash=h; } }
+  const h=`#${view}/${encodeURIComponent(sel.value)}/${FM_TAB[view]==="xi"?"strongest-xi":FM_TAB[view]}`; if(location.hash!==h) try{ history.replaceState(null,"",h); }catch(e){ location.hash=h; } }
 function fmTab(view,k){ FM_TAB[view]=fmTabsFor(view).some(t=>t[0]===k)?k:"squad"; fmHash(view); view==="squads"?renderSquad():renderSpfl(); }
 const fmPanel=(h,b,note)=>`<div class="fm-panel"><div class="fm-ph">${h}</div><div class="fm-pb">${b}</div>${note?`<div class="note">${note}</div>`:''}</div>`;
 const fmKV=rows=>`<table class="kv">`+rows.filter(Boolean).map(([k,v])=>`<tr><td class="l">${k}</td><td class="b">${v}</td></tr>`).join("")+`</table>`;
