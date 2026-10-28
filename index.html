@@ -724,6 +724,11 @@ function render(D, fetchedAt, stale){
 
 /* ---------- match reports (gw|home|away -> page) ---------- */
 const MATCH_REPORTS={"8|Liverpool|Brighton":"reports/2026-10-25-liverpool-v-brighton.html"};
+/* cup and other non-league reports (shown under Results on each club's Fixtures tab) */
+const CUP_REPORTS=[{teams:["Liverpool","Chelsea"],date:"Wed 28 Oct",comp:"Carabao Cup R4",home:"Liverpool",away:"Chelsea",score:"1-1",note:"Liverpool win 6-5 on pens",url:"reports/2026-10-28-liverpool-v-chelsea.html"}];
+function cupRepPanel(team){ const L=CUP_REPORTS.filter(r=>r.teams.includes(team)); if(!L.length) return ""; return fmPanel(`Cup match reports · ${L.length}`,`<div class="fm-scroll"><table><tr><th>Date</th><th class="l">Competition</th><th class="l">Match</th><th>Score</th><th></th></tr>${L.map(r=>`<tr><td>${esc(r.date)}</td><td class="nm" style="font-weight:400">${esc(r.comp)}</td><td class="nm">${esc(r.home)} v ${esc(r.away)}</td><td class="b">${esc(r.score)}${r.note?` <small>(${esc(r.note)})</small>`:''}</td><td><a class="mr-link" href="${r.url}">MATCH REPORT ↗</a></td></tr>`).join("")}</table></div>`); }
+/* Scottish Premiership reports: club|date|opponent -> page */
+const SPFL_REPORTS={"Celtic|Wed 28 Oct|Dundee United":"reports/2026-10-28-celtic-v-dundee-united.html","Dundee United|Wed 28 Oct|Celtic":"reports/2026-10-28-celtic-v-dundee-united.html"};
 /* ===== LIVERPOOL CLUB PAGE · terminal extras (Liverpool only for now) ===== */
 const LFC_TABS=[["overview","Overview"],["news","Latest News"],["squad","Squad"],["tactics","Team Style"],["shots","Shots"],["xi","Strongest XI"],["managers","Managers"],["fixtures","Fixtures"],["injuries","Injuries"],["stats","Stats"]];
 function fmTabsFor(view){ try{ const tm=($("teampick")&&$("teampick").value)||"Liverpool"; if(view==="squads" && tm==="Liverpool") return LFC_TABS; if(view==="squads" && tm==="Man Utd") return UTD_TABS; }catch(e){} return view==="spfl"?SPFL_TABS:FM_TABS; }
@@ -1282,6 +1287,7 @@ function renderSquad(){
       const fr=F.map(f=>{ const home=f.home===team, opp=home?f.away:f.home;
         return `<tr><td>GW${esc(f.gw)}</td><td>${esc(f.date)}</td><td>${esc(f.ko||'–')}</td><td class="nm">${esc(opp)}</td><td><span class="ha ${home?'H':'A'}">${home?'H':'A'}</span></td><td>${posOf(opp)?ordn(posOf(opp)):'–'}</td><td>${esc(f.status||'')}</td></tr>`; }).join("");
       return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel(`Results · ${R.length} played`,`<div class="fm-scroll"><table><tr><th>GW</th><th>Date</th><th class="l">Opponent</th><th>H/A</th><th>Score</th><th></th><th>xG (us - them)</th><th></th></tr>${rr}</table></div>`)}
+        ${cupRepPanel(team)}
         ${fmPanel(`Remaining fixtures · ${F.length}`,`<div class="fm-scroll"><table><tr><th>GW</th><th>Date</th><th>KO (UK)</th><th class="l">Opponent</th><th>H/A</th><th>Opp. position</th><th></th></tr>${fr}</table></div>`,'Kick-off times are FPL placeholders (often Sat 15:00) until the TV picks are made.')}</div></div>`;
     }
     if(tab==="injuries"){
@@ -1540,9 +1546,9 @@ function renderSpfl(){
     }
     if(tab==="fixtures"){
       const rr=[...c.results].reverse().map(r=>{ const [x,y]=(r.score||"").split("-").map(Number); const o=x>y?"W":x===y?"D":"L";
-        return `<tr><td>${esc(r.date)}</td><td class="nm">${esc(r.opp)}</td><td><span class="ha ${r.ha==='H'?'H':'A'}">${esc(r.ha)}</span></td><td class="b">${esc(r.score)}</td><td><span class="wdl ${o}">${o}</span></td><td>${posOf(r.oppId)?ordn(posOf(r.oppId)):'–'}</td></tr>`; }).join("");
+        return `<tr><td>${esc(r.date)}</td><td class="nm">${esc(r.opp)}</td><td><span class="ha ${r.ha==='H'?'H':'A'}">${esc(r.ha)}</span></td><td class="b">${esc(r.score)}</td><td><span class="wdl ${o}">${o}</span></td><td>${posOf(r.oppId)?ordn(posOf(r.oppId)):'–'}</td><td>${SPFL_REPORTS[team+'|'+r.date+'|'+r.opp]?`<a class="mr-link" href="${SPFL_REPORTS[team+'|'+r.date+'|'+r.opp]}">MATCH REPORT ↗</a>`:''}</td></tr>`; }).join("");
       const fr=c.fixtures.map(f=>`<tr><td>${esc(f.date)}</td><td class="nm">${esc(f.opp)}</td><td><span class="ha ${f.ha==='H'?'H':'A'}">${esc(f.ha)}</span></td><td>${posOf(f.oppId)?ordn(posOf(f.oppId)):'–'}</td><td>${f.flag?`<span class="muted" style="font-size:11px">${esc(f.flag)}</span>`:''}</td></tr>`).join("");
-      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel(`Results · ${c.results.length} played`,c.results.length?`<div class="fm-scroll"><table><tr><th>Date</th><th class="l">Opponent</th><th>H/A</th><th>Score</th><th></th><th>Opp. position</th></tr>${rr}</table></div>`:'<div class="muted">No results yet</div>')}
+      return `<div class="fm-wrap"><div class="fm-main fm-col">${fmPanel(`Results · ${c.results.length} played`,c.results.length?`<div class="fm-scroll"><table><tr><th>Date</th><th class="l">Opponent</th><th>H/A</th><th>Score</th><th></th><th>Opp. position</th><th></th></tr>${rr}</table></div>`:'<div class="muted">No results yet</div>')}
         ${fmPanel(`Remaining fixtures · ${c.fixtures.length}`,c.fixtures.length?`<div class="fm-scroll"><table><tr><th>Date · KO (UK)</th><th class="l">Opponent</th><th>H/A</th><th>Opp. position</th><th></th></tr>${fr}</table></div>`:'<div class="muted">No fixtures listed</div>',
           'Scottish Premiership league games only (ESPN). The fixture list covers the 33 games before the split; the post-split fixtures are only added once the SPFL announces them. Opponent positions come from the current table.')}</div></div>`;
     }
