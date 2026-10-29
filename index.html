@@ -761,7 +761,7 @@ function lfcTicker(S,T){
   top("form",4,p=>it.push(`<span class="li"><span class="lk" style="color:${LXC.y}">▲ IN FORM</span> ${esc(p.name.toUpperCase())} <b>${p.form.toFixed(1)}</b> <small>pts/g</small></span>`));
   top("min",2,p=>it.push(`<span class="li"><span class="lk">MINUTES</span> ${esc(p.name.toUpperCase())} <b>${p.min}</b></span>`));
   if(!it.length) return "";
-  return `<div class="lxtick"><span class="lxtl">LFC.FEED</span><div class="lxtw"><div class="lxtr">${it.join("")}${it.join("")}</div></div><a class="lxmg" href="#managers" onclick="setView('managers');return false">★ MANAGERS ↗</a></div>`;
+  return `<div class="lxtick"><span class="lxtl">LFC.FEED</span><div class="lxtw"><div class="lxtr">${it.join("")}${it.join("")}</div></div><a class="lxmg" href="#managers" onclick="MG_AF=false;MG_CLUB='lfc';MG_SCOPE='all';setView('managers');return false">★ MANAGERS ↗</a></div>`;
 }
 
 /* ---- fixture heat strip ---- */
@@ -1080,12 +1080,12 @@ function lfcWrap(tab,plBody,D,S,team){
   if(!LFCX||!LFCH) lfcLoad();
   const base=()=>plBody()||"";
   const wrap=h=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${h}</div></div>`;
-  if(tab==="overview") return wrap(`<div class="lxgrid2">${lfcHeat(D,team)}${lfcLuck(D,team)}</div>${lfcPath(D,team)}`)+base();
+  if(tab==="overview") return wrap(`<a class="lxbtn" href="#managers" onclick="MG_AF=false;MG_CLUB='lfc';MG_SCOPE='all';setView('managers');return false">★ LIVERPOOL MANAGERS · 1892 TO NOW · EVERY BOSS, RECORD AND TROPHY ↗</a><div class="lxgrid2" style="margin-top:8px">${lfcHeat(D,team)}${lfcLuck(D,team)}</div>${lfcPath(D,team)}`)+base();
   if(tab==="tactics"||tab==="style") return wrap(lfcStyle(D)+lfcLineup()+lfcScanner()+lfcFormations(D));
   if(tab==="news") return wrap(lfcNews());
   if(tab==="shots") return wrap(lfcShots(D));
   if(tab==="xi") return wrap(lfcXI());
-  if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a><a class="lxbtn" href="#managers" onclick="return mgLadderJump()">★ ALL-TIME LADDER · WINNING MACHINES v SILVERWARE KINGS ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
+  if(tab==="managers") return wrap(`<a class="lxbtn" href="#managers" onclick="MG_AF=false;MG_CLUB='lfc';MG_SCOPE='all';setView('managers');return false">★ OPEN THE FULL LIVERPOOL MANAGERS PAGE ↗</a><a class="lxbtn" href="#managers" onclick="return mgLadderJump()">★ ALL-TIME LADDER · WINNING MACHINES v SILVERWARE KINGS ↗</a>${lfcCurMgr(D)}${lfcAllMgr()}`);
   if(tab==="fixtures") return wrap(`${lfcPath(D,team)}${lfcHeat(D,team)}`)+base();
   return base();
 }
