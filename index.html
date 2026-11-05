@@ -898,6 +898,39 @@ function lxSimilar(ST,team){
   const d=T.map((t,i)=>[t,Math.sqrt(Z[i].reduce((a,z,k)=>a+(z-me[k])**2,0))]).filter(x=>x[0]!==team).sort((a,b)=>a[1]-b[1]);
   const far=d[d.length-1][1]||1; return d.map(([t,x])=>[t,Math.round(100*(1-x/far))]);
 }
+/* second STYLE.RADAR outline; remembered until the club being viewed changes */
+let TS_CMP=null, TS_CMP_FOR=null;
+function tsStyleOthers(team){
+  const ST=(LFCX&&LFCX.style)||{};
+  return Object.keys(ST).filter(t=>t!==team&&ST[t]&&typeof ST[t]==="object").sort((a,b)=>a.localeCompare(b,"en"));
+}
+function tsCompare(team){
+  const ST=(LFCX&&LFCX.style)||{}, others=tsStyleOthers(team);
+  if(!ST[team]||!others.length) return "";
+  if(TS_CMP_FOR!==team||!others.includes(TS_CMP)){
+    TS_CMP_FOR=team;
+    const sim=lxSimilar(ST,team);
+    TS_CMP=(sim[0]&&others.includes(sim[0][0]))?sim[0][0]:others[0];
+  }
+  return TS_CMP;
+}
+function tsCompareCtl(team){
+  const cur=tsCompare(team);
+  return `<div class="lxctl"><label class="lxdim" for="lx-cmp">Compare with</label><select id="lx-cmp" class="lxsel" aria-label="Compare with" onchange="tsSetCompare(this.value)">${tsStyleOthers(team).map(t=>`<option value="${esc(t)}"${t===cur?" selected":""}>${esc(t)}</option>`).join("")}</select></div>`;
+}
+function tsRadarNote(team,selfColor){
+  return `<div class="lxnote">Each spoke runs from the lowest club in the league (centre) to the highest (edge). <span style="color:${selfColor}">■ ${esc(team)}</span> <span id="lx-cmp-name" style="color:${LXC.opp}">■ ${esc(tsCompare(team))}</span> <span style="color:${LXC.m}">■ league average</span></div>`;
+}
+function lxRadarPanel(canvasId,team,selfColor){
+  return lxPanel("STYLE.RADAR",`${tsCompareCtl(team)}<div class="lxrad"><canvas id="${canvasId}"></canvas></div>${tsRadarNote(team,selfColor)}`);
+}
+function tsSetCompare(name){
+  const team=($("teampick")&&$("teampick").value)||"", ST=LFCX&&LFCX.style;
+  if(!team||!ST||!ST[name]||typeof ST[name]!=="object"||name===team) return;
+  TS_CMP_FOR=team; TS_CMP=name;
+  const lab=$("lx-cmp-name"); if(lab) lab.textContent="■ "+name;
+  try{ if(team==="Liverpool") lfcStyleChart(); else tsChart(team); }catch(e){ console.warn(e); }
+}
 function lfcStyle(D){
   if(!LFCX) return lxPanel("TEAM.STYLE",lxWait());
   const ST=LFCX.style, s=ST.Liverpool; if(!s) return lxPanel("TEAM.STYLE",'<div class="lxnote">No data yet.</div>');
@@ -907,17 +940,18 @@ function lfcStyle(D){
   const spo=s.sp-s.pen, spb=s.sp?`${s.sp} (${[s.pen?s.pen+" penalt"+(s.pen===1?"y":"ies"):"",spo?spo+" from corners / free kicks":""].filter(Boolean).join(", ")})`:"0";
   const extra=fmKV([["Goals scored / conceded",`${s.gf} / ${s.ga}`],["Late goals (76'+) scored / conceded",`${s.late} / ${s.lateA}`],["Early goals (0-15') scored",s.early],["Set pieces",spb],["Counter-attack goals",s.fast],
     ["Headed shots",`${s.head} of ${s.boxShots+s.outShots}`],["Shots faced",`${(s.shotsA/s.P).toFixed(1)} a game (${s.sotA} on target)`],["Fouls committed",`${(s.fouls/s.P).toFixed(1)} a game`]]);
-  const sim=lxSimilar(ST,"Liverpool"), best=sim[0];
+  const sim=lxSimilar(ST,"Liverpool");
   const simh=sim.slice(0,3).map(([t,p],i)=>`<div class="sim${i===0?' on':''}"><span class="simn">${esc(t.toUpperCase())}</span><span class="simb"><i style="width:${p}%"></i></span><span class="simv">${p}%</span></div>`).join("")+
     `<div class="lxdim" style="margin-top:6px">Least alike: ${esc(sim[sim.length-1][0])}</div>`;
   return `<div class="lxgrid2">${lxPanel("TEAM.STYLE · PER GAME · LEAGUE RANK",`<div class="stg">${tiles}</div>`,"LIVERPOOL")}
-   ${lxPanel("STYLE.RADAR",`<div class="lxrad"><canvas id="lx-radar"></canvas></div><div class="lxnote">Each spoke runs from the lowest club in the league (centre) to the highest (edge). <span style="color:${LXC.liv}">■ Liverpool</span> <span style="color:${LXC.opp}">■ ${esc(best[0])}</span> <span style="color:${LXC.m}">■ league average</span></div>`)}</div>
+   ${lxRadarPanel("lx-radar","Liverpool",LXC.liv)}</div>
    <div class="lxgrid2">${lxPanel("PLAYS.MOST.LIKE",`${simh}<div class="lxnote">Compares possession, shots for and against, shots on target, pass accuracy, crosses, long balls, ball wins, corners and shots from inside the box against every other league club. 100% = identical style, 0% = the least alike club.</div>`)}
    ${lxPanel("STYLE.DETAIL",extra+`<div class="lxnote">League games only, ${s.P} played. Ball wins = tackles won plus interceptions. Late goals = 76th minute onwards, including stoppage time. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`)}</div>`;
 }
 function lfcStyleChart(){
   if(!LFCX||!$("lx-radar")||typeof Chart==="undefined") return;
-  const ST=LFCX.style, T=Object.keys(ST), best=lxSimilar(ST,"Liverpool")[0][0];
+  const ST=LFCX.style, T=Object.keys(ST), best=tsCompare("Liverpool");
+  if(!best||!ST[best]) return;
   const norm=(f,t)=>{ const v=T.map(x=>f(ST[x])), lo=Math.min(...v), hi=Math.max(...v); return hi>lo?100*(f(ST[t])-lo)/(hi-lo):50; };
   const avg=LX_AX.map(([k,l,u,f])=>{ const v=T.map(x=>f(ST[x])), lo=Math.min(...v), hi=Math.max(...v), m=v.reduce((a,b)=>a+b,0)/v.length; return hi>lo?100*(m-lo)/(hi-lo):50; });
   const ds=(lab,t,c)=>({label:lab,data:LX_AX.map(a=>norm(a[3],t)),borderColor:c,backgroundColor:c+"33",pointBackgroundColor:c,borderWidth:2,pointRadius:3});
@@ -1103,7 +1137,7 @@ function tsPage(team){
     ["Shots / on target",`${s.shots} / ${s.sot} (${(s.shots/s.P).toFixed(1)} a game)`],["Shots from inside the box",`${s.boxShots} of ${s.boxShots+s.outShots}`],["Headed shots",`${s.head} of ${s.boxShots+s.outShots}`],
     ["Ball wins",`${s.tklw+s.int} (${s.tklw} tackles won, ${s.int} interceptions)`],["Shots faced",`${(s.shotsA/s.P).toFixed(1)} a game (${s.sotA} on target)`],["Fouls committed",`${(s.fouls/s.P).toFixed(1)} a game`]]);
   return wrap(`<div class="lxgrid2">${lxPanel("TEAM.STYLE · PER GAME · LEAGUE RANK",`<div class="stg">${tiles}</div>`,code)}
-   ${lxPanel("STYLE.RADAR",`<div class="lxrad"><canvas id="ts-radar"></canvas></div><div class="lxnote">Each spoke runs from the lowest club in the league (centre) to the highest (edge). <span style="color:${LXC.g}">■ ${esc(team)}</span> <span style="color:${LXC.opp}">■ ${esc(lxSimilar(ST,team)[0][0])}</span> <span style="color:${LXC.m}">■ league average</span></div>`)}</div>
+   ${lxRadarPanel("ts-radar",team,LXC.g)}</div>
    <div class="lxgrid2">${tsLike(team)}
    ${lxPanel("STYLE.DETAIL",extra+`<div class="lxnote">League games only, ${s.P} played. Ball wins = tackles won plus interceptions. Set-piece goals include penalties. Late goals = 76th minute onwards, including stoppage time. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`)}</div>
    ${tsLineup(team)}`);
@@ -1112,7 +1146,8 @@ function tsChart(team){
   if(!LFCX||!$("ts-radar")||typeof Chart==="undefined") return;
   const ST=LFCX.style, T=Object.keys(ST); if(!ST[team]) return;
   const nr=(f,v)=>{ const a=T.map(x=>f(ST[x])), lo=Math.min(...a), hi=Math.max(...a); return hi>lo?100*(v-lo)/(hi-lo):50; };
-  const mean=f=>T.reduce((a,x)=>a+f(ST[x]),0)/T.length, c=LXC.g, B=lxSimilar(ST,team)[0][0];
+  const mean=f=>T.reduce((a,x)=>a+f(ST[x]),0)/T.length, c=LXC.g, B=tsCompare(team);
+  if(!B||!ST[B]) return;
   try{ draw("ts-radar",{type:"radar",data:{labels:LX_AX.map(a=>a[1]),datasets:[
     {label:team,data:LX_AX.map(a=>nr(a[3],a[3](ST[team]))),borderColor:c,backgroundColor:c+"33",pointBackgroundColor:c,borderWidth:2,pointRadius:3},
     {label:B,data:LX_AX.map(a=>nr(a[3],a[3](ST[B]))),borderColor:LXC.opp,backgroundColor:LXC.opp+"22",pointBackgroundColor:LXC.opp,borderWidth:2,pointRadius:2},
@@ -1161,7 +1196,7 @@ function tsLineup(team){
 function tsLike(team){
   const ST=LFCX.style, sim=lxSimilar(ST,team);
   return lxPanel("PLAYS.MOST.LIKE",sim.slice(0,3).map(([t,p],i)=>`<div class="sim${i===0?' on':''}"><span class="simn">${esc(t.toUpperCase())}</span><span class="simb"><i style="width:${p}%"></i></span><span class="simv">${p}%</span></div>`).join("")+
-    `<div class="lxdim" style="margin-top:6px">Least alike: ${esc(sim[sim.length-1][0])}</div><div class="lxnote">Compares possession, shots for and against, shots on target, pass accuracy, crosses, long balls, ball wins, corners and shots from inside the box against every other league club. 100% = identical style, 0% = the least alike club. The closest match is drawn in blue on the radar.</div>`);
+    `<div class="lxdim" style="margin-top:6px">Least alike: ${esc(sim[sim.length-1][0])}</div><div class="lxnote">Compares possession, shots for and against, shots on target, pass accuracy, crosses, long balls, ball wins, corners and shots from inside the box against every other league club. 100% = identical style, 0% = the least alike club. The closest match is the default blue outline on the radar.</div>`);
 }
 
 /* ---------- club page tabs (shared by Squads + Scotland) ---------- */
