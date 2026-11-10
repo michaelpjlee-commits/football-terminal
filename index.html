@@ -1111,7 +1111,7 @@ const newsWrap=team=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${c
 /* ---- wiring ---- */
 /* ---- strongest XI vs actual XI · 2026/27 ---- */
 const LXI={best:[["GK","Becker",15.5],["DEF","Araujo",19.7],["DEF","Jacquet",18.9],["DEF","Van Dijk",16.9],["DEF","Kerkez",13.9],["MID","Gakpo",24.3],["MID","Muñoz",22.0],["MID","Wirtz",21.3],["MID","Szoboszlai",20.3],["MID","Gravenberch",18.5],["FWD","Isak",31.7]],
- now:[["GK","Becker",15.5],["DEF","Araujo",19.7],["DEF","Jacquet",18.9],["DEF","Van Dijk",16.9],["DEF","Kerkez",13.9],["MID","Gakpo",24.3],["MID","Wirtz (75% fit · ankle)",21.3],["MID","Gravenberch",18.5],["MID","Barcola",16.5],["MID","Mac Allister",15.0],["FWD","Isak",31.7]],
+ now:[["GK","Becker",15.5],["DEF","Araujo",19.7],["DEF","Jacquet",18.9],["DEF","Van Dijk",16.9],["DEF","Kerkez",13.9],["MID","Gakpo",24.3],["MID","Muñoz",22.0],["MID","Wirtz",21.3],["MID","Gravenberch (75% · heel)",18.5],["MID","Barcola",16.5],["FWD","Isak",31.7]],
  g:[[1,"23 Aug","Newcastle (A)","2-2","D",9,93.9,"Araujo, Muñoz","Frimpong, Ngumoha"],[2,"29 Aug","Nott'm Forest (H)","2-2","D",9,95.1,"Araujo, Gravenberch","Frimpong, Mac Allister"],[3,"4 Sep","Ipswich (A)","2-0","W",10,98.4,"Gravenberch","Mac Allister"],[4,"12 Sep","Fulham (H)","0-0","D",9,96.4,"Kerkez, Gakpo","Tsimikas, Barcola"],[5,"20 Sep","Bournemouth (A)","1-0","W",9,96.0,"Muñoz, Gravenberch","Mac Allister, Barcola"],[6,"11 Oct","Man City (H)","0-3","L",8,88.3,"Gakpo, Szoboszlai, Isak","Mac Allister, Koumas, Barcola"],[7,"17 Oct","Brentford (A)","2-1","W",9,94.9,"Gakpo, Gravenberch","Mac Allister, Barcola"],[8,"25 Oct","Brighton (H)","2-0","W",9,95.2,"Muñoz, Szoboszlai","Mac Allister, Barcola"]]};
 function lfcXI(){
   const rc=r=>r==="W"?"#1de9a0":r==="L"?"#ff5c7a":"#f5c542";
@@ -1119,13 +1119,13 @@ function lfcXI(){
   const kpi=(l,v,s)=>`<div class="st"><div class="stl">${l}</div><div class="stv">${v}</div><div class="str">${s}</div></div>`;
   const rows=LXI.g.map(g=>`<tr><td>GW${g[0]}</td><td>${g[1]}</td><td style="text-align:left">${esc(g[2])}</td><td>${g[3]}</td><td style="color:${rc(g[4])};font-weight:700">${g[4]}</td><td>${g[5]}/11</td><td>${g[6].toFixed(1)}%</td><td style="text-align:left">${esc(g[7])}</td><td style="text-align:left">${esc(g[8])}</td></tr>`).join("");
   return lxPanel("STRONGEST.XI v ACTUAL.XI · 2026/27",`<div class="lxgrid2" style="margin-bottom:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">${kpi("AVG OVERLAP","9.0<small>/11</small>","with the strongest XI")}${kpi("AVG XI STRENGTH","94.8<small>%</small>","of the strongest XI's rating")}${kpi("TOP-4 STRONGEST XIs","2.50<small>ppg</small>","W3 D1 L0")}${kpi("BOTTOM-4 XIs","1.25<small>ppg</small>","W1 D2 L1")}</div>
-  <div class="lxnote" style="margin-bottom:10px">Each player is rated by the Premier League's official bonus-points rating per 90 minutes (min. 270 league minutes). The rating counts about 30 actions and treats each position differently: saves and clean sheets for goalkeepers; clean sheets, tackles, clearances and blocks for defenders; passing, chances and goals for midfielders; goals, assists and shots for forwards. The strongest XI takes the best-rated player in each slot of Liverpool's most-used shape (1 GK, 4 DEF, 5 MID, 1 FWD; started in 7 of 8 games). An XI's strength is its 11 starters' total rating as a % of the strongest XI's total.</div>
-  <div class="lxgrid2"><div>${xt(LXI.best,"223.0","IF ALL FIT")}</div><div>${xt(LXI.now,"212.2 (95.2%)","AVAILABLE NOW")}</div></div>
-  <div class="lxnote">"Available now" leaves out Szoboszlai (hamstring, no return date) and Muñoz (knee, 25% chance), using injury news as of 28 Oct.</div>
+  <div class="lxnote" style="margin-bottom:10px">Each player is rated by the Premier League's official bonus-points rating per 90 minutes (min. 270 league minutes). The rating counts about 30 actions and treats each position differently: saves and clean sheets for goalkeepers; clean sheets, tackles, clearances and blocks for defenders; passing, chances and goals for midfielders; goals, assists and shots for forwards. The strongest XI takes the best-rated player in each slot of Liverpool's most-used shape (1 GK, 4 DEF, 5 MID, 1 FWD; a 4-2-3-1 in all 10 league games). An XI's strength is its 11 starters' total rating as a % of the strongest XI's total.</div>
+  <div class="lxgrid2"><div>${xt(LXI.best,"223.0","IF ALL FIT")}</div><div>${xt(LXI.now,"219.2 (98.3%)","AVAILABLE NOW")}</div></div>
+  <div class="lxnote">"Available now" uses the same GW1–8 ratings and leaves out Szoboszlai (knee: off at 69' at Crystal Palace on 8 Nov, not 100% at full time; a doubt for Hungary, BBC 9 Nov; no confirmed return, next league game Man Utd on 22 Nov). Muñoz is available. Gravenberch (heel, day to day, missed Arsenal, Fenerbahce and Palace) stays in, with the 75% figure still coming from the player feed. Wirtz has started the last two league games. News as of 10 Nov.</div>
   <div class="chartbox tall" style="margin-top:12px"><canvas id="lx-xi"></canvas></div>
   <div style="overflow-x:auto;margin-top:10px"><table class="mg-table" style="width:100%"><thead><tr><th>GW</th><th>Date</th><th style="text-align:left">Opponent</th><th>Score</th><th>Res</th><th>Overlap</th><th>Strength</th><th style="text-align:left">Missing from strongest XI</th><th style="text-align:left">Started instead</th></tr></thead><tbody>${rows}</tbody></table></div>
   <div class="lxnote">Strongest v most rotated: the 4 strongest XIs (avg 96.5%) took 10 pts, 2.50 per game. The 4 weakest (avg 93.1%) took 5 pts, 1.25 per game. 10/11 overlap: 3.00 ppg (1 game). 9/11: 2.00 ppg (6 games). 8/11: 0.00 ppg (1 game). Only 8 games, so treat this with care: the opponent matters as much as the XI, and ratings partly reflect results. Reasons for past absences aren't recorded, only current injuries.</div>
-  <div class="lxnote"><b>Verdict:</b> Iraola rarely rotates. Becker, Van Dijk, Jacquet and Wirtz started all 8 games, and Isak and Kerkez started 7. The one heavy rotation, without Isak, Gakpo and Szoboszlai, came in the 0-3 home loss to City (88.3%). Midfield is the usual gap: Mac Allister or Barcola come in, rated 3-7 lower per 90. With Szoboszlai and Muñoz out, the best XI available now is 95.2%, in line with the norm. · by @tamerton</div>`,"GW1-8");
+  <div class="lxnote"><b>Verdict:</b> The per-90 ratings and the game-by-game table are still the 28 Oct figures (GW1–8) and have not been recomputed. In those eight games Becker, Van Dijk, Jacquet and Wirtz started every match, and Isak and Kerkez started 7. The one heavy rotation, without Isak, Gakpo and Szoboszlai, came in the 0-3 home loss to City (88.3%). FBref playing time through Palace (8 Nov): Becker, Van Dijk, Jacquet and Wirtz have started all 10, Isak and Kerkez 9. On the same GW1–8 ratings, leaving out Szoboszlai and bringing in Barcola, the best XI available now is 219.2 (98.3%). · by @tamerton</div>`,"GW1-8 RATINGS");
 }
 function lfcXIChart(){ const G=LXI.g, rc=r=>r==="W"?"#1de9a0":r==="L"?"#ff5c7a":"#f5c542";
   draw("lx-xi",{type:"bar",data:{labels:G.map(g=>`GW${g[0]} ${g[2].replace(/ \(.\)/,"")} ${g[3]} ${g[4]}`),datasets:[{label:"XI strength %",data:G.map(g=>g[6]),backgroundColor:G.map(g=>rc(g[4])),borderWidth:0}]},
@@ -1250,6 +1250,34 @@ function pitchHtml(xi){
   return {shape, html:`<div class="pitch"><div class="box1"></div><div class="box2"></div>${dots}</div>`};
 }
 
+/* Liverpool-only availability. Applied when the squad feed still has the old text, so a later feed update is left alone. */
+const LFC_AVAIL = {
+  Szoboszlai:{status:"Injured", chance:null, news:"Knee — off at 69' vs Crystal Palace (8 Nov) after extending it. Iraola said he was not 100% at full time. A doubt for Hungary's Nations League games (BBC, 9 Nov). No confirmed club return date; next league game is Man Utd at home, 22 Nov."},
+  Gravenberch:{news:"Heel — day to day, not a foot injury. Missed Arsenal (1 Nov), Fenerbahce (4 Nov) and Crystal Palace (8 Nov). Iraola (6 Nov): a matter of pain. Possible return vs Man Utd, 22 Nov. The 75% figure is from the player feed."},
+  Frimpong:{news:"Hamstring — missed the last six league games. The club (19 Oct) did not expect him before this break. Possible return vs Man Utd, 22 Nov (Liverpool.com, 10 Nov)."},
+  Bradley:{news:"Knee — out since January. Iraola (14 Sep): not close to training with the team. No confirmed return date."},
+  Leoni:{news:"ACL — out since September 2025. Club (15 Oct): due to resume squad training during this international break, not yet match-ready."},
+  "Ekitiké":{news:"Achilles — ruptured in April. Iraola (11 Sep): a realistic chance of helping in the last two Champions League league-phase games, in January."}
+};
+function applyLfcAvail(list){
+  (list||[]).forEach(p=>{
+    if(p.team!=="Liverpool") return;
+    const n=p.name, news=p.news||"";
+    if(n==="Szoboszlai" && /^available$/i.test(p.status||"")){
+      p.status=LFC_AVAIL.Szoboszlai.status; p.chance=LFC_AVAIL.Szoboszlai.chance; p.news=LFC_AVAIL.Szoboszlai.news;
+    } else if(n==="Gravenberch" && /foot/i.test(news)){
+      p.news=LFC_AVAIL.Gravenberch.news;
+    } else if(n==="Frimpong" && /unknown return/i.test(news)){
+      p.news=LFC_AVAIL.Frimpong.news;
+    } else if(n==="Bradley" && /unknown return/i.test(news)){
+      p.news=LFC_AVAIL.Bradley.news;
+    } else if(n==="Leoni" && /unknown return/i.test(news)){
+      p.news=LFC_AVAIL.Leoni.news;
+    } else if(n==="Ekitiké" && /unknown return/i.test(news)){
+      p.news=LFC_AVAIL["Ekitiké"].news;
+    }
+  });
+}
 /* ---------- SQUADS view (FM-style club page) ---------- */
 const CLUBS = { // name: [code, primary, secondary, header text]
   "Arsenal":["ARS","#db0007","#9c824a","#fff"], "Aston Villa":["AVL","#670e36","#95bfe5","#fff"], "Bournemouth":["BOU","#b50e12","#111111","#fff"],
@@ -1331,6 +1359,7 @@ function makeSortable(table){
 }
 function renderSquad(){
   const D=LAST_D; if(!D) return;
+  applyLfcAvail(D.squads);
   const team=$("teampick").value || "Liverpool";
   const box=$("squadpage");
   const S=D.squads.filter(p=>p.team===team);
