@@ -133,6 +133,12 @@ body.v-squads #view-squads{display:block}
 .fm table{width:100%;border-collapse:collapse;font-size:12.5px}
 .fm th{background:#232a3c;color:#93a0b8;font-weight:600;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;padding:7px 5px;text-align:center;border-bottom:1px solid #34405a;white-space:nowrap}
 .fm th.l,.fm td.nm{text-align:left}
+#squadpage th.sqs{cursor:pointer;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#squadpage th.sqs:hover,#squadpage th.sqs:focus-visible{color:#dfe5ee}
+#squadpage th.sqs:focus-visible{outline:1px solid #5c6b86;outline-offset:-2px}
+#squadpage th.sqs.sqs-on{color:#f1f4f9}
+#squadpage th.sqs.sqs-on:after{content:" ▲";font-size:9px;letter-spacing:0}
+#squadpage th.sqs.sqs-on.sqs-desc:after{content:" ▼"}
 .fm td{padding:4px 5px;text-align:center;border-bottom:1px solid #262e40;white-space:nowrap}
 .fm tr:nth-child(even) td{background:#1f2637}
 .fm tr.out td{color:#8b93a5}.fm td.b{font-weight:700;color:#fff}.fm tr.out td.b{color:#9aa2b3}
@@ -1258,6 +1264,59 @@ function fillTeamPicker(D){
   sel.innerHTML = teams.map(t=>`<option${t===want?" selected":""}>${esc(t)}</option>`).join("");
   if(!teams.includes(want) && teams.includes("Liverpool")) sel.value="Liverpool";
 }
+/* Click a heading to sort, click again to reverse. Numbers go low to high, text A–Z; blanks and "-" stay last either way. */
+function makeSortable(table){
+  if(!table||table.dataset.sqs) return;
+  const head=[...table.rows].find(r=>r.cells.length&&[...r.cells].every(c=>c.tagName==="TH"));
+  if(!head) return;
+  table.dataset.sqs="1";
+  let col=-1, dir=1;
+  const body=()=>[...table.rows].filter(r=>r!==head&&r.cells.length);
+  const raw=td=>{
+    if(!td) return "";
+    const c=td.cloneNode(true);
+    c.querySelectorAll(".news").forEach(n=>n.remove());
+    const kids=[...c.children];
+    if(kids.length>1) return kids.map(el=>el.textContent.replace(/\s+/g," ").trim()).filter(Boolean).join(" ");
+    let t=(kids[0]?kids[0].textContent:c.textContent).replace(/\u00a0/g," ").replace(/\s+/g," ").trim();
+    if(/^[●✚✕!S]$/.test(t)){ const a=td.querySelector("[title]"); if(a&&a.title) t=a.title.trim(); }
+    return t;
+  };
+  const key=td=>{
+    const t=raw(td);
+    if(!t||t==="-"||t==="–"||t==="—"||t==="--") return {e:1,t:""};
+    const cur=t.match(/^£\s*([\d,.]+)\s*([kmb])$/i);
+    if(cur){ let n=parseFloat(cur[1].replace(/,/g,"")); const u=cur[2].toLowerCase(); if(u==="k") n/=1000; else if(u==="b") n*=1000; return {e:0,n,t}; }
+    const pair=t.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+    if(pair) return {e:0,n:+pair[1],n2:+pair[2],t};
+    if(/^-?\d{1,3}(?:,\d{3})+(?:\.\d+)?%?$/.test(t)||/^-?\d+(?:\.\d+)?%?$/.test(t)) return {e:0,n:parseFloat(t.replace(/,/g,"").replace("%","")),t};
+    return {e:0,t};
+  };
+  const go=i=>{
+    const rows=body(); if(!rows.length) return;
+    dir=col===i?-dir:1; col=i;
+    const num=rows.some(r=>!key(r.cells[i]).e)&&rows.every(r=>{ const k=key(r.cells[i]); return k.e||k.n!=null; });
+    [...head.cells].forEach((th,j)=>{
+      const on=j===i; th.classList.toggle("sqs-on",on); th.classList.toggle("sqs-desc",on&&dir<0);
+      th.setAttribute("aria-sort",on?(dir>0?"ascending":"descending"):"none");
+    });
+    const keyed=rows.map((row,n)=>({row,k:key(row.cells[i]),n}));
+    keyed.sort((a,b)=>{
+      if(a.k.e!==b.k.e) return a.k.e?1:-1;
+      if(a.k.e) return a.n-b.n;
+      let c=0;
+      if(num){ c=a.k.n-b.k.n; if(!c&&a.k.n2!=null&&b.k.n2!=null) c=a.k.n2-b.k.n2; }
+      else c=a.k.t.localeCompare(b.k.t,"en",{sensitivity:"accent",numeric:true});
+      return c?dir*c:a.n-b.n;
+    });
+    const p=rows[0].parentNode; keyed.forEach(x=>p.appendChild(x.row));
+  };
+  [...head.cells].forEach((th,i)=>{
+    th.classList.add("sqs"); th.tabIndex=0; th.setAttribute("role","button"); th.setAttribute("aria-sort","none");
+    th.addEventListener("click",()=>go(i));
+    th.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(i); } });
+  });
+}
 function renderSquad(){
   const D=LAST_D; if(!D) return;
   const team=$("teampick").value || "Liverpool";
@@ -1374,6 +1433,7 @@ function renderSquad(){
   </div></div>`}
   <div class="fm-foot">Sources: club records and public match data${D.lastUpdated?' (updated '+esc(D.lastUpdated)+')':''}. Apps = league games with minutes; players sold or loaned out are not shown.${prov?' * Result provisional.':''}
    Values: Transfermarkt market-value estimates${D.valMeta.checked?' (checked '+esc(D.valMeta.checked)+')':''}${D.valMeta.rate?', converted from € at '+esc(D.valMeta.rate):''}; ${covered} of ${S.length} players have a value, '–' = no Transfermarkt figure. Styled after Football Manager; not affiliated.</div></div>`;
+  if(team==="Liverpool"&&tab==="squad"){ const sq=box.querySelector(".fm-scroll>table"); if(sq) makeSortable(sq); }
   if(team==="Liverpool") lfcAfter(tab); else if(tab==="tactics") tsChart(team);
 }
 
