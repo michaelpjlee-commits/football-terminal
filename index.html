@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Football Terminal · @tamerton</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="vendor/chart.umd.min.js"></script>
+<script>if(typeof Chart==="undefined")document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"><\/script>');</script>
+<script src="vendor/chartjs-plugin-datalabels.min.js"></script>
+<script>if(typeof ChartDataLabels==="undefined")document.write('<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"><\/script>');</script>
 <style>
 :root{
   --bg:#05070a; --panel:#0b1016; --panel2:#0e151d; --line:#1a2a33;
@@ -74,6 +76,7 @@ main{padding:18px 22px 40px;max-width:1600px;margin:0 auto}
 .ph .meta{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
 .chartbox{position:relative;height:280px}
 .chartbox.tall{height:340px}
+.chart-missing{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--mono);font-size:12px;text-align:center;padding:12px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;font-weight:500;color:var(--dim);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line)}
 td{padding:6px 8px;border-bottom:1px solid #111c23}
@@ -565,16 +568,25 @@ function extract(t){
 
 /* ---------- charts ---------- */
 if(typeof Chart!=="undefined"){
-  Chart.register(ChartDataLabels);
+  if(typeof ChartDataLabels!=="undefined"){
+    Chart.register(ChartDataLabels);
+    Chart.defaults.plugins.datalabels.display=false;
+  }
   Chart.defaults.color=C.dim; Chart.defaults.borderColor=C.line;
   Chart.defaults.font.family='"JetBrains Mono","Fira Code",Consolas,"Liberation Mono",monospace'; Chart.defaults.font.size=11;
-  Chart.defaults.plugins.datalabels.display=false;
   Chart.defaults.plugins.legend.labels.boxWidth=12;
   Chart.defaults.maintainAspectRatio=false;
   Chart.defaults.animation.duration=600;
 }
 const charts={};
-function draw(id,cfg){ if(charts[id]) charts[id].destroy(); charts[id]=new Chart($(id),cfg); }
+function chartNote(id){
+  const el=$(id); if(!el) return;
+  const box=el.parentElement; if(!box||box.querySelector(".chart-missing")) return;
+  el.style.display="none";
+  const n=document.createElement("div"); n.className="chart-missing"; n.textContent="Chart unavailable";
+  box.appendChild(n);
+}
+function draw(id,cfg){ if(typeof Chart==="undefined"){ chartNote(id); return; } if(charts[id]) charts[id].destroy(); charts[id]=new Chart($(id),cfg); }
 const gridOpts={color:"rgba(26,42,51,.7)"};
 function glowFill(ctx,color,h=280){ const g=ctx.createLinearGradient(0,0,0,h); g.addColorStop(0,color+"55"); g.addColorStop(1,color+"00"); return g; }
 function isSmall(ctx){ const ds=ctx.chart.data.datasets.flatMap(d=>d.data).filter(v=>v!=null); const max=Math.max(...ds,1); return (ctx.dataset.data[ctx.dataIndex]||0) < max*0.14; }
@@ -957,7 +969,7 @@ function lfcStyle(D){
    ${lxPanel("STYLE.DETAIL",extra+`<div class="lxnote">League games only, ${s.P} played. Ball wins = tackles won plus interceptions. Late goals = 76th minute onwards, including stoppage time. Updated ${esc(lxDY(LFCX.updated.slice(0,10)))}.</div>`)}</div>`;
 }
 function lfcStyleChart(){
-  if(!LFCX||!$("lx-radar")||typeof Chart==="undefined") return;
+  if(!LFCX||!$("lx-radar")) return;
   const ST=LFCX.style, T=Object.keys(ST), best=tsCompare("Liverpool");
   if(!best||!ST[best]) return;
   const norm=(f,t)=>{ const v=T.map(x=>f(ST[x])), lo=Math.min(...v), hi=Math.max(...v); return hi>lo?100*(f(ST[t])-lo)/(hi-lo):50; };
@@ -1047,7 +1059,7 @@ function lfcAllMgr(){
    <div class="lxnote">All official games, same counting as the Managers page (3 points for a win in every era, shoot-outs count as draws). Both records use the same number of games: the shorter of the two reigns. Chart = points race over those games. Updated ${esc(lxDY(LFCH.updated.slice(0,10)))}.</div>`);
 }
 function lxRace(id,ga,gb,la,lb,mode){
-  if(!$(id)||typeof Chart==="undefined") return;
+  if(!$(id)) return;
   const run=g=>{ let p=0; return g.map(([f,a],i)=>{ p+=f>a?3:f===a?1:0; return mode==="ppg"?+(p/(i+1)).toFixed(2):p; }); };
   const N=mode==="ppg"?Math.max(ga.length,gb.length):Math.min(ga.length,gb.length);
   const A=run(ga.slice(0,N)), B=run(gb.slice(0,N));
@@ -1151,7 +1163,7 @@ function tsPage(team){
    ${tsLineup(team)}`);
 }
 function tsChart(team){
-  if(!LFCX||!$("ts-radar")||typeof Chart==="undefined") return;
+  if(!LFCX||!$("ts-radar")) return;
   const ST=LFCX.style, T=Object.keys(ST); if(!ST[team]) return;
   const nr=(f,v)=>{ const a=T.map(x=>f(ST[x])), lo=Math.min(...a), hi=Math.max(...a); return hi>lo?100*(v-lo)/(hi-lo):50; };
   const mean=f=>T.reduce((a,x)=>a+f(ST[x]),0)/T.length, c=LXC.g, B=tsCompare(team);
@@ -2088,7 +2100,6 @@ function showError(err, usingSnap){
 async function loadAll(){
   if(loading) return; loading=true; $("refresh").disabled=true; setStatus("load","FETCHING…");
   try{
-    if(typeof Chart==="undefined") throw new Error("The chart library didn't load (check your internet connection).");
     const grids=await Promise.all(CORE_TABS.map(fetchTab));
     const t={}; CORE_TABS.forEach((k,i)=>t[k]=grids[i]);
     const ex=await Promise.all(EXTRA_TABS.map(k=>fetchTab(k).catch(e=>{ console.warn(e); return null; })));
@@ -2105,7 +2116,7 @@ async function loadAll(){
     if(!c && SNAPSHOT){ const s=SNAPSHOT.t, tt={}; Object.entries(SNAP_NAMES).forEach(([k,n])=>tt[k]=s[n]); c={t:tt,at:SNAPSHOT.at}; }
     if(c && SNAPSHOT){ EXTRA_TABS.forEach(k=>{ if(!c.t[k]) c.t[k]=SNAPSHOT.t[SNAP_NAMES[k]]; }); }
     showError(err instanceof TypeError ? new Error("The request was blocked ("+err.message+").") : err, !!c);
-    try{ if(c && typeof Chart!=="undefined") render(extract(c.t),new Date(c.at),true); }catch(e){ console.error(e); }
+    try{ if(c) render(extract(c.t),new Date(c.at),true); }catch(e){ console.error(e); }
     $("foot").textContent="Showing a saved copy · it will switch to live data automatically when available";
   }finally{ loading=false; $("refresh").disabled=false; countdown=REFRESH_SECS; }
 }
