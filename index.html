@@ -1110,24 +1110,86 @@ function lfcNews(){ return clubNews("Liverpool"); }
 const newsWrap=team=>`<div class="fm-wrap"><div class="fm-main fm-col lxcol">${clubNews(team)}</div></div>`;
 /* ---- wiring ---- */
 /* ---- strongest XI vs actual XI · 2026/27 ---- */
-const LXI={best:[["GK","Becker",15.5],["DEF","Araujo",19.7],["DEF","Jacquet",18.9],["DEF","Van Dijk",16.9],["DEF","Kerkez",13.9],["MID","Gakpo",24.3],["MID","Muñoz",22.0],["MID","Wirtz",21.3],["MID","Szoboszlai",20.3],["MID","Gravenberch",18.5],["FWD","Isak",31.7]],
- now:[["GK","Becker",15.5],["DEF","Araujo",19.7],["DEF","Jacquet",18.9],["DEF","Van Dijk",16.9],["DEF","Kerkez",13.9],["MID","Gakpo",24.3],["MID","Muñoz",22.0],["MID","Wirtz",21.3],["MID","Gravenberch (75% · heel)",18.5],["MID","Barcola",16.5],["FWD","Isak",31.7]],
+/* GW1–8 bonus-points rating per 90. A name is here only if he cleared 270 league minutes. */
+const LXI_RT={Becker:15.5,Araujo:19.7,Jacquet:18.9,"Van Dijk":16.9,Kerkez:13.9,Gakpo:24.3,"Muñoz":22.0,Wirtz:21.3,Szoboszlai:20.3,Gravenberch:18.5,Isak:31.7,Barcola:16.5,"Mac Allister":15.0};
+const LXI_AS={Alisson:"Becker"};
+/* 4-2-3-1 as listed: LM/RM are the double pivot, AM-L/AM-R the wide attackers. */
+const LXI_SLOT={G:"GK",RB:"RB","CD-L":"CB","CD-R":"CB",CD:"CB",LB:"LB",LM:"DM",RM:"DM",AM:"CAM","AM-L":"WG","AM-R":"WG",F:"ST"};
+const LXI_SIDE={"CD-L":["CB","L"],"CD-R":["CB","R"],LM:["DM","L"],RM:["DM","R"],"AM-L":["WG","L"],"AM-R":["WG","R"]};
+const LXI_WING_LEFT="Gakpo";
+const LXI={out:["Szoboszlai"],
  g:[[1,"23 Aug","Newcastle (A)","2-2","D",9,93.9,"Araujo, Muñoz","Frimpong, Ngumoha"],[2,"29 Aug","Nott'm Forest (H)","2-2","D",9,95.1,"Araujo, Gravenberch","Frimpong, Mac Allister"],[3,"4 Sep","Ipswich (A)","2-0","W",10,98.4,"Gravenberch","Mac Allister"],[4,"12 Sep","Fulham (H)","0-0","D",9,96.4,"Kerkez, Gakpo","Tsimikas, Barcola"],[5,"20 Sep","Bournemouth (A)","1-0","W",9,96.0,"Muñoz, Gravenberch","Mac Allister, Barcola"],[6,"11 Oct","Man City (H)","0-3","L",8,88.3,"Gakpo, Szoboszlai, Isak","Mac Allister, Koumas, Barcola"],[7,"17 Oct","Brentford (A)","2-1","W",9,94.9,"Gakpo, Gravenberch","Mac Allister, Barcola"],[8,"25 Oct","Brighton (H)","2-0","W",9,95.2,"Muñoz, Szoboszlai","Mac Allister, Barcola"]]};
+function lxiKey(s){ return LXI_AS[s]||s; }
+function lxiStarts(){
+  const G=(LFCX&&LFCX.lfc)||[], fc={};
+  G.forEach(g=>{ const f=(g.ro&&g.ro.Liverpool&&g.ro.Liverpool.f)||g.form||""; if(f) fc[f]=(fc[f]||0)+1; });
+  const form=Object.entries(fc).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0];
+  const P={};
+  if(!form) return {form:"",n:0,N:G.length,P};
+  G.forEach(g=>{
+    const ro=g.ro&&g.ro.Liverpool; if(!ro||ro.f!==form[0]) return;
+    (ro.xi||[]).forEach(p=>{
+      const name=lxiKey(p.s), grp=LXI_SLOT[p.pos]; if(!grp||LXI_RT[name]==null) return;
+      const o=P[name]||(P[name]={grp:{},side:{CB:{L:0,R:0},DM:{L:0,R:0},WG:{L:0,R:0}},no:p.no});
+      o.grp[grp]=(o.grp[grp]||0)+1; o.no=p.no;
+      const sd=LXI_SIDE[p.pos]; if(sd) o.side[sd[0]][sd[1]]++;
+      P[name]=o;
+    });
+  });
+  return {form:form[0],n:form[1],N:G.length,P};
+}
+function lxiPair(cands,preferLeft){
+  const two=[...cands].sort((a,b)=>b.rate-a.rate||a.name.localeCompare(b.name)).slice(0,2);
+  const LR=(L,R)=>[Object.assign({},L,{side:"L"}),Object.assign({},R,{side:"R"})];
+  if(two.length<2) return two.map((p,i)=>Object.assign({},p,{side:i?"R":"L"}));
+  if(preferLeft&&two.some(p=>p.name===preferLeft)) return LR(two.find(p=>p.name===preferLeft),two.find(p=>p.name!==preferLeft));
+  const pref=p=>p.L>p.R?"L":p.R>p.L?"R":"", [a,b]=two, pa=pref(a), pb=pref(b);
+  if(pa==="R"||(pb==="L"&&pa!=="L")) return LR(b,a);
+  return LR(a,b);
+}
+function lxiPick(exclude){
+  const S=lxiStarts(), ex=new Set(exclude||[]), used=new Set();
+  const pool=(grp,side)=>Object.keys(S.P).filter(name=>!ex.has(name)&&!used.has(name)&&(S.P[name].grp[grp]||0)>0).map(name=>({name,rate:LXI_RT[name],no:S.P[name].no,L:side?S.P[name].side[side].L:0,R:side?S.P[name].side[side].R:0}));
+  const one=grp=>{ const c=pool(grp).sort((a,b)=>b.rate-a.rate||a.name.localeCompare(b.name))[0]; if(!c) return []; used.add(c.name); return [Object.assign(c,{slot:grp})]; };
+  const pair=(grp,side,slots,prefer)=>{ const got=lxiPair(pool(grp,side),prefer); got.forEach(p=>{ used.add(p.name); p.slot=p.side==="L"?slots[0]:slots[1]; }); return got; };
+  const xi=[...one("GK"),...one("RB"),...pair("CB","CB",["CB","CB"]),...one("LB"),...pair("DM","DM",["DM-L","DM-R"]),...one("CAM"),...pair("WG","WG",["LW","RW"],LXI_WING_LEFT),...one("ST")];
+  return {form:S.form,n:S.n,N:S.N,xi};
+}
+function lxiOrder(xi){
+  const cb=xi.filter(p=>p.slot==="CB").sort((a,b)=>b.rate-a.rate||a.name.localeCompare(b.name));
+  const by=s=>xi.find(p=>p.slot===s);
+  return [by("GK"),by("RB"),...cb,by("LB"),by("DM-L"),by("DM-R"),by("CAM"),by("LW"),by("RW"),by("ST")].filter(Boolean);
+}
+function lxiPos(p){ return p.slot==="CB"?(p.side==="L"?"CD-L":"CD-R"):({GK:"G",RB:"RB",LB:"LB","DM-L":"LM","DM-R":"RM",CAM:"AM",LW:"AM-L",RW:"AM-R",ST:"F"})[p.slot]; }
+function lxiPitch(xi,id){
+  const k=6, lay=lxLayout(xi.map((p,i)=>({no:p.no||"",s:p.name,pos:lxiPos(p),fp:i+1,rate:p.rate})), "4-2-3-1"), pt=lxPitch(k,id);
+  const node=({p,x,y})=>{ const [cx,cy]=pt.P(x,y), r=14, pts=[...Array(6)].map((_,q)=>{ const a=(-90+q*60)*Math.PI/180; return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`; }).join(" ");
+    return `<g><polygon points="${pts}" fill="${LXC.liv}2e" stroke="${LXC.liv}" stroke-width="2" style="filter:drop-shadow(0 0 6px ${LXC.liv})"/>
+     <text x="${cx}" y="${cy+5}" fill="#fff" font-size="13" font-weight="700" text-anchor="middle">${esc(p.no)}</text>
+     <text x="${cx}" y="${cy+r+14}" fill="${LXC.t}" font-size="11" text-anchor="middle" stroke="${LXC.bg}" stroke-width="3" paint-order="stroke">${esc(String(p.s).toUpperCase())}</text>
+     <text x="${cx}" y="${cy+r+26}" fill="${LXC.y}" font-size="10" text-anchor="middle" stroke="${LXC.bg}" stroke-width="3" paint-order="stroke">${p.rate.toFixed(1)}</text></g>`; };
+  return `<svg class="lxsvg" viewBox="0 0 ${pt.W} ${pt.H}" role="img" aria-label="Liverpool strongest XI">${pt.svg}${lay.map(node).join("")}<text x="${pt.W-8}" y="16" fill="${LXC.g}" font-size="11" text-anchor="end" letter-spacing="1">4-2-3-1 · ATTACK ▶</text></svg>`;
+}
 function lfcXI(){
+  if(!LFCX||!LFCX.lfc) return lxPanel("STRONGEST.XI v ACTUAL.XI · 2026/27",lxWait(),"GW1-8 RATINGS");
+  const fit=lxiPick([]), now=lxiPick(LXI.out), sum=L=>Math.round(10*L.reduce((a,p)=>a+p.rate,0))/10;
+  const tf=sum(fit.xi), tn=sum(now.xi), pct=tf?(100*tn/tf):0;
   const rc=r=>r==="W"?"#1de9a0":r==="L"?"#ff5c7a":"#f5c542";
-  const xt=(L,tot,h)=>`<table class="mg-table" style="width:100%"><thead><tr><th style="text-align:left">${h}</th><th>Pos</th><th style="text-align:right">Rating/90</th></tr></thead><tbody>${L.map(p=>`<tr><td>${esc(p[1])}</td><td>${p[0]}</td><td style="text-align:right">${p[2].toFixed(1)}</td></tr>`).join("")}<tr><td><b>Total</b></td><td></td><td style="text-align:right"><b>${tot}</b></td></tr></tbody></table>`;
+  const xt=(L,tot,avail)=>`<table class="mg-table" style="width:100%"><thead><tr><th style="text-align:left">Player</th><th>Pos</th><th style="text-align:right">Rating/90</th></tr></thead><tbody>${L.map(p=>`<tr><td>${esc(p.name==="Gravenberch"&&avail?p.name+" (75% · heel)":p.name)}</td><td>${p.slot}</td><td style="text-align:right">${p.rate.toFixed(1)}</td></tr>`).join("")}<tr><td><b>Total</b></td><td></td><td style="text-align:right"><b>${tot}</b></td></tr></tbody></table>`;
   const kpi=(l,v,s)=>`<div class="st"><div class="stl">${l}</div><div class="stv">${v}</div><div class="str">${s}</div></div>`;
   const rows=LXI.g.map(g=>`<tr><td>GW${g[0]}</td><td>${g[1]}</td><td style="text-align:left">${esc(g[2])}</td><td>${g[3]}</td><td style="color:${rc(g[4])};font-weight:700">${g[4]}</td><td>${g[5]}/11</td><td>${g[6].toFixed(1)}%</td><td style="text-align:left">${esc(g[7])}</td><td style="text-align:left">${esc(g[8])}</td></tr>`).join("");
+  const shape=fit.n&&fit.n===fit.N?`${fit.form} in all ${fit.N} league games`:`${fit.form} in ${fit.n} of ${fit.N} league games`;
+  const col=(title,pack,tot,avail)=>`<div><div class="lxk" style="margin-top:0">${title}</div>${lxiPitch(pack,avail?"xin":"xif")}${xt(lxiOrder(pack),tot,avail)}</div>`;
   return lxPanel("STRONGEST.XI v ACTUAL.XI · 2026/27",`<div class="lxgrid2" style="margin-bottom:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">${kpi("AVG OVERLAP","9.0<small>/11</small>","with the strongest XI")}${kpi("AVG XI STRENGTH","94.8<small>%</small>","of the strongest XI's rating")}${kpi("TOP-4 STRONGEST XIs","2.50<small>ppg</small>","W3 D1 L0")}${kpi("BOTTOM-4 XIs","1.25<small>ppg</small>","W1 D2 L1")}</div>
-  <div class="lxnote" style="margin-bottom:10px">Each player is rated by the Premier League's official bonus-points rating per 90 minutes (min. 270 league minutes). The rating counts about 30 actions and treats each position differently: saves and clean sheets for goalkeepers; clean sheets, tackles, clearances and blocks for defenders; passing, chances and goals for midfielders; goals, assists and shots for forwards. The strongest XI takes the best-rated player in each slot of Liverpool's most-used shape (1 GK, 4 DEF, 5 MID, 1 FWD; a 4-2-3-1 in all 10 league games). An XI's strength is its 11 starters' total rating as a % of the strongest XI's total.</div>
-  <div class="lxgrid2"><div>${xt(LXI.best,"223.0","IF ALL FIT")}</div><div>${xt(LXI.now,"219.2 (98.3%)","AVAILABLE NOW")}</div></div>
+  <div class="lxnote" style="margin-bottom:10px">Each player is rated by the Premier League's official bonus-points rating per 90 minutes (min. 270 league minutes). The rating counts about 30 actions and treats each position differently: saves and clean sheets for goalkeepers; clean sheets, tackles, clearances and blocks for defenders; passing, chances and goals for midfielders; goals, assists and shots for forwards. The strongest XI uses Liverpool's most-used shape (${shape}) and fills GK, RB, CB, CB, LB, DM-L, DM-R, CAM, LW, RW and ST. A player is only eligible for a position he has started this season, and only if he has a GW1–8 rating. Each slot takes the best-rated player still available. Where two players can play either side, each goes to the side he has started more often. Gakpo and Muñoz have both started either wing; Gakpo is placed on the left and Muñoz on the right. When fit, Szoboszlai is DM-R, the side he has started most. An XI's strength is its 11 starters' total rating as a % of the strongest XI's total. The 11 names are the same as the previous broad-slot XI, so the GW1–8 overlap table still matches.</div>
+  <div class="lxgrid2">${col("IF ALL FIT",fit.xi,tf.toFixed(1),0)}${col("AVAILABLE NOW",now.xi,`${tn.toFixed(1)} (${pct.toFixed(1)}%)`,1)}</div>
   <div class="lxnote">"Available now" uses the same GW1–8 ratings and leaves out Szoboszlai (knee: off at 69' at Crystal Palace on 8 Nov, not 100% at full time; a doubt for Hungary, BBC 9 Nov; no confirmed return, next league game Man Utd on 22 Nov). Muñoz is available. Gravenberch (heel, day to day, missed Arsenal, Fenerbahce and Palace) stays in, with the 75% figure still coming from the player feed. Wirtz has started the last two league games. News as of 10 Nov.</div>
   <div class="chartbox tall" style="margin-top:12px"><canvas id="lx-xi"></canvas></div>
   <div style="overflow-x:auto;margin-top:10px"><table class="mg-table" style="width:100%"><thead><tr><th>GW</th><th>Date</th><th style="text-align:left">Opponent</th><th>Score</th><th>Res</th><th>Overlap</th><th>Strength</th><th style="text-align:left">Missing from strongest XI</th><th style="text-align:left">Started instead</th></tr></thead><tbody>${rows}</tbody></table></div>
   <div class="lxnote">Strongest v most rotated: the 4 strongest XIs (avg 96.5%) took 10 pts, 2.50 per game. The 4 weakest (avg 93.1%) took 5 pts, 1.25 per game. 10/11 overlap: 3.00 ppg (1 game). 9/11: 2.00 ppg (6 games). 8/11: 0.00 ppg (1 game). Only 8 games, so treat this with care: the opponent matters as much as the XI, and ratings partly reflect results. Reasons for past absences aren't recorded, only current injuries.</div>
-  <div class="lxnote"><b>Verdict:</b> The per-90 ratings and the game-by-game table are still the 28 Oct figures (GW1–8) and have not been recomputed. In those eight games Becker, Van Dijk, Jacquet and Wirtz started every match, and Isak and Kerkez started 7. The one heavy rotation, without Isak, Gakpo and Szoboszlai, came in the 0-3 home loss to City (88.3%). FBref playing time through Palace (8 Nov): Becker, Van Dijk, Jacquet and Wirtz have started all 10, Isak and Kerkez 9. On the same GW1–8 ratings, leaving out Szoboszlai and bringing in Barcola, the best XI available now is 219.2 (98.3%). · by @tamerton</div>`,"GW1-8 RATINGS");
+  <div class="lxnote"><b>Verdict:</b> The per-90 ratings and the game-by-game table are still the 28 Oct figures (GW1–8) and have not been recomputed. In those eight games Becker, Van Dijk, Jacquet and Wirtz started every match, and Isak and Kerkez started 7. The one heavy rotation, without Isak, Gakpo and Szoboszlai, came in the 0-3 home loss to City (88.3%). FBref playing time through Palace (8 Nov): Becker, Van Dijk, Jacquet and Wirtz have started all 10, Isak and Kerkez 9. On the same GW1–8 ratings, leaving out Szoboszlai and bringing in Mac Allister, the best XI available now is ${tn.toFixed(1)} (${pct.toFixed(1)}%). · by @tamerton</div>`,"GW1-8 RATINGS");
 }
-function lfcXIChart(){ const G=LXI.g, rc=r=>r==="W"?"#1de9a0":r==="L"?"#ff5c7a":"#f5c542";
+function lfcXIChart(){ if(!$("lx-xi")) return; const G=LXI.g, rc=r=>r==="W"?"#1de9a0":r==="L"?"#ff5c7a":"#f5c542";
   draw("lx-xi",{type:"bar",data:{labels:G.map(g=>`GW${g[0]} ${g[2].replace(/ \(.\)/,"")} ${g[3]} ${g[4]}`),datasets:[{label:"XI strength %",data:G.map(g=>g[6]),backgroundColor:G.map(g=>rc(g[4])),borderWidth:0}]},
    options:{animation:false,responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{color:"#e6fff5",anchor:"end",align:"end",formatter:v=>v.toFixed(1)+"%"},tooltip:{callbacks:{label:c=>`${c.raw}% · ${G[c.dataIndex][5]}/11 overlap`}}},scales:{y:{min:80,max:100,ticks:{color:"#7fa89a",callback:v=>v+"%"},grid:{color:"rgba(127,168,154,.12)"}},x:{ticks:{color:"#7fa89a",maxRotation:40,minRotation:0},grid:{display:false}}}}}); }
 function lfcWrap(tab,plBody,D,S,team){
