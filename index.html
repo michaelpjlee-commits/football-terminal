@@ -271,6 +271,7 @@ body.v-managers #view-managers{display:block}
 .mg-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--green2),var(--green))}
 .mg-seq .f{width:15px;height:15px;line-height:15px;font-size:9px;margin-right:1px}
 .mg-wide{overflow-x:auto}
+.mg-cmp-tr{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px;color:var(--dim);margin-top:6px}.mg-cmp-tr div+div{text-align:right}
 .mg-pick{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .mg-pick select{font-family:var(--mono);font-size:13px;background:#0b1016;color:var(--txt);border:1px solid var(--green);border-radius:4px;padding:6px 10px;min-width:240px;flex:1;max-width:420px}
 .h2h-head{display:grid;grid-template-columns:1fr 150px 1fr;gap:8px;align-items:end;margin-bottom:6px}
@@ -1845,6 +1846,7 @@ const MG_SCOPES=[["all","All competitions","All comps"],["league","League","Leag
 let MG_CLUB=(location.hash.match(/^#managers\/(celtic|united|city|arsenal|villa|bournemouth|brentford|brighton|spurs)/)||[])[1]||"lfc";
 let MG_SCOPE=(location.hash.match(/^#managers\/(?:(?:celtic|united|city|arsenal|villa|bournemouth|brentford|brighton|spurs)\/?)?(all|league|cups|europe)/)||[])[1]||"all";
 let MG_SORT={k:"order",dir:1}, MG_SHORT=false, MG_H2H=null;
+let MG_CMP=/^#managers\/compare/.test(location.hash), MG_CA=null, MG_CB=null;
 const MG_CFG={
   lfc:{club:"Liverpool",title:"Liverpool managers · 1892 to now",since:"1892",tabs:["managers","mseasons","mfirst","mgames","msources"],h2h:/Klopp/,
     trophy:[["League titles","League titles","#ffc940"],["2nd Division titles","2nd Div titles","#b388ff"],["FA Cups","FA Cups","#4cc9f0"],["League Cups","League Cups","#00c27a"],
@@ -1871,7 +1873,7 @@ const MG_CFG={
   brighton:{club:"Brighton",title:"Brighton managers · 1920 to now",since:"1920",tabs:[],h2h:/Hürzeler/,trophy:[],sub:"",missing:"",fin:"",d2:false,ladderOnly:true},
   spurs:{club:"Spurs",title:"Tottenham Hotspur managers · 1898 to now",since:"1898",tabs:[],h2h:/De Zerbi/,trophy:[],sub:"",missing:"",fin:"",d2:false,ladderOnly:true}};
 let MG_TROPHY_COLS=MG_CFG[MG_CLUB].trophy;
-function mgHash(){ if(MG_CLUB==="united"&&typeof MG_AF!=="undefined"&&MG_AF) return "#managers/united/after-ferguson"; return "#managers"+(MG_CLUB==="lfc"?"":"/"+MG_CLUB)+(MG_SCOPE==="all"?"":"/"+MG_SCOPE); }
+function mgHash(){ if(MG_CMP) return "#managers/compare"; if(MG_CLUB==="united"&&typeof MG_AF!=="undefined"&&MG_AF) return "#managers/united/after-ferguson"; return "#managers"+(MG_CLUB==="lfc"?"":"/"+MG_CLUB)+(MG_SCOPE==="all"?"":"/"+MG_SCOPE); }
 function mgParse(t, cfg){
   const n=num, [tm,ts,tf,tg,tsrc]=cfg.tabs.map(k=>t[k]);
   return {
@@ -1899,7 +1901,7 @@ function extractManagers(t, D){
   mgUse(D);
 }
 function mgUse(D){ const s=(D.mgClubs||{})[MG_CLUB]; if(!s) return; Object.assign(D,s); MG_TROPHY_COLS=MG_CFG[MG_CLUB].trophy; }
-function mgSetClub(c){ if(c===MG_CLUB&&!MG_AF) return; MG_AF=false; MG_CLUB=c; MG_H2H=null; MG_SORT={k:"order",dir:1}; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); }
+function mgSetClub(c){ if(c===MG_CLUB&&!MG_AF&&!MG_CMP) return; MG_CMP=false; MG_AF=false; MG_CLUB=c; MG_H2H=null; MG_SORT={k:"order",dir:1}; try{ history.replaceState(null,"",mgHash()); }catch(e){} renderManagers(); }
 const mgLabel=r=>r.name+(r.spell?` (${r.spell.replace(" spell","")})`:"");
 const mgShort=r=>{ const s=r.name.replace("No manager (directors in charge)","No manager").replace("Roy Evans & Gérard Houllier","Evans & Houllier").split(" "); const base=s.length>1&&!/^No|Evans/.test(r.name)?s[s.length-1]:s.join(" "); return base+(r.spell?(r.spell.startsWith("1")?" I":r.spell.startsWith("2")?" II":" III"):""); };
 const mgYears=r=>{ const a=(r.first||"").slice(-4), b=r.cur?"now":(r.last||"").slice(-4); return a?(a===b?a:`${a}–${b}`):""; };
@@ -1947,6 +1949,62 @@ function mgFinCard(LD){
   return `<div class="card p12 mgf" style="margin-top:14px"><div class="ph"><h2>★ League finishes · season by season</h2><span class="meta">final league position · * part of the season · amber = 2nd tier · grey = Southern League</span></div>
    ${[...LD.rows].reverse().filter(r=>r.f&&r.f.length).map(r=>`<div class="mgf-r"><div class="mgf-w"><b>${esc(r.n)}</b><i>${esc(r.y)} · P ${r.P} · W ${r.W} · D ${r.D} · L ${r.L} · ${(r.W/r.P*100).toFixed(1)}%</i></div><div class="mgf-cs">${r.f.map(chip).join("")}</div></div>`).join("")}</div>`;
 }
+
+/* ---------- CROSS-CLUB MANAGER HEAD TO HEAD (#managers/compare) ---------- */
+function mgCmpOpen(){ MG_CMP=true; MG_AF=false; try{ history.replaceState(null,"","#managers/compare"); }catch(e){} setView("managers"); window.scrollTo(0,0); return false; }
+function mgCmpList(){
+  const o=[]; Object.keys(MG_CFG).forEach(k=>{ const LD=MG_LADDERS[k]; if(!LD) return; LD.rows.forEach((r,i)=>{ if(r.P>0) o.push({k,i,r,club:MG_CFG[k].club,LD}); }); }); return o;
+}
+function mgCmpYear(y){ const m=String(y||"").match(/\d{4}/); return m?+m[0]:0; }
+function mgCmpSur(n){ return String(n||"").replace(/\(.*?\)/g,"").trim().split(/\s+/).slice(-1)[0].toLowerCase(); }
+function mgCmpGames(e){
+  if(!LFCH||!LFCH.clubs||!LFCH.clubs[e.k]) return null;
+  const sur=mgCmpSur(e.r.n), y=mgCmpYear(e.r.y);
+  const c=LFCH.clubs[e.k].mgrs.filter(m=>mgCmpSur(m.n)===sur&&Math.abs(mgCmpYear(m.f)-y)<=1);
+  return c.length===1?lxDec(c[0].s):null;
+}
+function mgCmpFin(e){
+  if(e.r.f&&e.r.f.length){ const chip=c=>`<span class="mgf-c mgf-${c[2]}${c[1]==='1st'?' mgf-1':''}">${c[0]} <b>${c[1]}</b>${c[3]?'*':''}</span>`; return `<div class="mgf-cs">${e.r.f.map(chip).join("")}</div>`; }
+  const M=(LAST_D&&LAST_D.mgClubs||{})[e.k]; if(M&&M.mgr){
+    const sur=mgCmpSur(e.r.n), y=mgCmpYear(e.r.y);
+    const c=M.mgr.filter(m=>m.scope==="All competitions"&&m.P>0&&mgCmpSur(m.name)===sur&&Math.abs(mgCmpYear(m.appointed||m.spell)-y)<=1);
+    if(c.length===1&&(c[0].best||c[0].avgFin!=null)) return `<span class="mono">${c[0].best?'Best league finish <b>'+esc(c[0].best)+'</b>':''}${c[0].best&&c[0].avgFin!=null?' · ':''}${c[0].avgFin!=null?'average finish <b>'+c[0].avgFin+'</b>':''}${c[0].tfs?' · '+c[0].tfs+' seasons':''}</span>`;
+  }
+  return `<span class="legend">Season-by-season finishes not listed for this manager yet.</span>`;
+}
+function mgCmpRender(){
+  const L=mgCmpList(); if(!L.length) return `<div class="card"><div class="legend">Manager data is loading.</div></div>`;
+  if(!LFCH&&typeof lfcLoad==="function"){ lfcLoad(); let n=0; const t=setInterval(()=>{ n++; if(LFCH||n>25){ clearInterval(t); if(LFCH&&MG_CMP&&document.body.classList.contains("v-managers")) renderManagers(); } },400); }
+  const find=(k,re)=>{ const x=L.find(e=>e.k===k&&re.test(e.r.n)); return x?x.k+":"+x.r.n:null; };
+  const key=e=>e.k+":"+e.r.n+"|"+e.r.y;
+  if(!MG_CA||!L.some(e=>key(e)===MG_CA)){ const a=L.find(e=>e.k==="lfc"&&/Klopp/.test(e.r.n)); MG_CA=key(a||L[0]); }
+  if(!MG_CB||!L.some(e=>key(e)===MG_CB)){ const b=L.find(e=>e.k==="city"&&/Guardiola/.test(e.r.n)); MG_CB=key(b||L[1]||L[0]); }
+  const A=L.find(e=>key(e)===MG_CA), B=L.find(e=>key(e)===MG_CB);
+  const sel=(id,cur,fn)=>`<select id="${id}" onchange="${fn}(this.value)">${Object.keys(MG_CFG).filter(k=>MG_LADDERS[k]).map(k=>`<optgroup label="${esc(MG_CFG[k].club)}">${L.filter(e=>e.k===k).map(e=>`<option value="${esc(key(e))}"${key(e)===cur?" selected":""}>${esc(e.r.n)} (${esc(e.r.y.replace(/ ?\(current\)/,""))})</option>`).join("")}</optgroup>`).join("")}</select>`;
+  const tn=e=>Object.values(e.r.t||{}).reduce((a,b)=>a+b,0), wr=e=>e.r.P?e.r.W/e.r.P*100:0;
+  const br=e=>{ const LK=e.LD.keys||MG_LKEYS; return LK.filter(([k])=>e.r.t[k]).map(([k,n])=>e.r.t[k]+" "+n).join(" · ")||"no major honours"; };
+  const col=(e,c)=>`<div class="card kpi" style="border-color:${c}"><div class="lbl" style="color:${c}">${esc(e.club)}</div><div class="val" style="font-size:22px;color:${c}">${esc(e.r.n)}</div><div class="sub">${esc(e.r.y)}</div></div>`;
+  const row=(lbl,a,b,fa,fb,hi)=>{ const w=hi===0?0:(a>b?1:b>a?-1:0)*hi; return `<tr><td class="num${w>0?' pos':''}"><b>${fa}</b></td><td style="text-align:center" class="xg">${lbl}</td><td class="num${w<0?' pos':''}"><b>${fb}</b></td></tr>`; };
+  const tbl=`<table class="mg-table" style="width:100%">${row("Games",A.r.P,B.r.P,A.r.P,B.r.P,0)}${row("Won",A.r.W,B.r.W,A.r.W,B.r.W,0)}${row("Drawn",A.r.D,B.r.D,A.r.D,B.r.D,0)}${row("Lost",A.r.L,B.r.L,A.r.L,B.r.L,0)}${row("Win rate",wr(A),wr(B),wr(A).toFixed(1)+"%",wr(B).toFixed(1)+"%",1)}${row("Major trophies",tn(A),tn(B),tn(A),tn(B),1)}</table>
+   <div class="mg-cmp-tr"><div>${esc(br(A))}</div><div>${esc(br(B))}</div></div>`;
+  const ga=mgCmpGames(A), gb=mgCmpGames(B); let eq="";
+  if(ga&&gb){ const N=Math.min(ga.length,gb.length), ra=lxRec(ga.slice(0,N)), rb=lxRec(gb.slice(0,N));
+    eq=`<div class="card p12" style="margin-top:14px"><div class="ph"><h2>Equal games · first ${N} each</h2><span class="meta">same number of games in charge</span></div>
+     <table class="mg-table" style="width:100%">${row("Games",N,N,N,N,0)}${row("Won",ra.W,rb.W,ra.W,rb.W,0)}${row("Drawn",ra.D,rb.D,ra.D,rb.D,0)}${row("Lost",ra.L,rb.L,ra.L,rb.L,0)}${row("Win rate",ra.win,rb.win,ra.win.toFixed(1)+"%",rb.win.toFixed(1)+"%",1)}${row("Points per game",ra.ppg,rb.ppg,ra.ppg.toFixed(2),rb.ppg.toFixed(2),1)}${row("Goals",ra.gf-ra.ga,rb.gf-rb.ga,ra.gf+":"+ra.ga,rb.gf+":"+rb.ga,1)}</table>
+     <div class="legend" style="margin-top:6px">First ${N} games of each reign, the length of the shorter one. Shoot-outs count as draws.</div></div>`;
+  } else eq=`<div class="legend" style="margin-top:10px">${(LFCH===null&&["lfc","united","city"].includes(A.k)&&["lfc","united","city"].includes(B.k))?"Loading game-by-game data… ":""}Overall career record shown. An equal-games comparison needs game-by-game data for both managers, which only some Liverpool, Man United and Man City managers have.</div>`;
+  return `<div class="lif-head"><h2>Manager head to head · any club</h2><span class="legend">built by <a href="https://x.com/tamerton" target="_blank" rel="noopener" class="gold">@tamerton</a></span></div>
+   <div class="card p12"><div class="ph"><h2>Pick two managers</h2><span class="meta">overall record = every competitive game in charge of that club</span></div>
+    <div class="mg-pick">${sel("mgc-a",MG_CA,"mgCmpSetA")}<span class="gold mono">v</span>${sel("mgc-b",MG_CB,"mgCmpSetB")}</div>
+    <div class="grid panels" style="margin-top:12px"><div class="p6">${col(A,"#ff3b5c")}</div><div class="p6">${col(B,"#3d9bff")}</div></div>
+    <div class="ph" style="margin-top:12px"><h2>Overall record</h2><span class="meta">all games with that club</span></div>${tbl}
+    <div class="ph" style="margin-top:14px"><h2>League finishes</h2></div>
+    <div class="grid panels"><div class="p6"><b>${esc(A.r.n)}</b><br>${mgCmpFin(A)}</div><div class="p6"><b>${esc(B.r.n)}</b><br>${mgCmpFin(B)}</div></div></div>
+   ${eq}
+   <div class="legend" style="margin-top:10px">Not affiliated with any club. Win rate = wins ÷ games; 3 points for a win in every era.</div>`;
+}
+function mgCmpSetA(v){ MG_CA=v; renderManagers(); }
+function mgCmpSetB(v){ MG_CB=v; renderManagers(); }
 function mgLadderJump(c){ if(c){ MG_AF=false; MG_CLUB=c; MG_SCOPE='all'; try{ history.replaceState(null,"","#managers"+(c==="lfc"?"":"/"+c)+"/ladder"); }catch(e){} } setView('managers'); setTimeout(()=>{ const e=document.getElementById('mg-ladder'); if(e) e.scrollIntoView({behavior:'smooth',block:'start'}); },250); return false; }
 /* ---------- MAN UNITED AFTER FERGUSON (sub-view of Managers · #managers/united/after-ferguson) ---------- */
 var MG_AF=MG_AF0||/^#managers\/united\/after-ferguson/.test(location.hash);
@@ -2018,7 +2076,8 @@ function mgAfRender(box,clubBtns){
 }
 function renderManagers(){
   const D=LAST_D, box=$("mgrpage"); if(!D||!box) return; mgUse(D); const CF=MG_CFG[MG_CLUB];
-  const clubBtns=`<nav class="views mg-scope mg-club"><span class="legend" style="margin-right:4px">CLUB</span>${Object.entries(MG_CFG).map(([k,c])=>`<button class="${k===MG_CLUB?'on':''}" onclick="mgSetClub('${k}')">${c.club}</button>`).join("")}</nav>`;
+  const clubBtns=`<nav class="views mg-scope mg-club"><span class="legend" style="margin-right:4px">CLUB</span>${Object.entries(MG_CFG).map(([k,c])=>`<button class="${k===MG_CLUB&&!MG_CMP?'on':''}" onclick="mgSetClub('${k}')">${c.club}</button>`).join("")}<button class="${MG_CMP?'on':''}" onclick="mgCmpOpen()">★ Compare managers</button></nav>`;
+  if(MG_CMP){ box.innerHTML=clubBtns+mgCmpRender(); return; }
   if(MG_CLUB==="united"&&MG_AF){ mgAfRender(box,clubBtns); return; }
   if(CF.ladderOnly){ box.innerHTML=clubBtns+mgLadders(D); return; }
   if(!D.mgr||!D.mgr.length){ box.innerHTML=clubBtns+`<div class="card"><div class="legend">${CF.club} manager data is loading or not available yet.</div></div>`; return; }
