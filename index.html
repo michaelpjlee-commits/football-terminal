@@ -1546,7 +1546,7 @@ const ST_HIST=[{"l": "12 Aug–19 Aug", "m": 69, "n": 149, "i": 13}, {"l": "19 A
 function stTrend(){const n=ST_HIST.length,x=i=>50+i*(560/(n-1)),y=v=>190-1.7*v;
  return `<div class="card" style="margin-top:14px"><div class="legend">SEASON TREND · weekly mood score (Wed–Wed) <span style="color:var(--green)">━ mood</span> <span style="color:var(--gold)">┅ Iraola net sentiment</span></div>
  <svg viewBox="0 0 640 250" style="width:100%;max-height:360px;margin-top:8px">
- ${[0,50,100].map(v=>`<line x1="40" x2="630" y1="${y(v)}" y2="${y(v)}" stroke="#1a2a33"/><text x="8" y="${y(v)+4}" fill="#6b8290" font-size="11" font-family="monospace">${v}</text>`).join("")}
+ ${[0,25,50,75,100].map(v=>`<line x1="40" x2="630" y1="${y(v)}" y2="${y(v)}" stroke="${v===50?'#3f5866':'#1a2a33'}" ${v===50?'stroke-dasharray="4 4"':''}/><text x="8" y="${y(v)+4}" fill="#6b8290" font-size="11" font-family="monospace">${v}</text>`).join("")}
  <line x1="40" x2="630" y1="${y(50)}" y2="${y(50)}" stroke="#6b8290" stroke-dasharray="2 4"/>
  <polyline fill="none" stroke="#ffc940" stroke-width="2" stroke-dasharray="5 4" points="${ST_HIST.map((h,i)=>x(i)+','+y(50+h.i/2)).join(' ')}"/>
  <polyline fill="none" stroke="#00ff9c" stroke-width="3" points="${ST_HIST.map((h,i)=>x(i)+','+y(h.m)).join(' ')}"/>
@@ -1573,7 +1573,7 @@ function renderSentiment(){const el=$("stpage"); if(!el) return; const k=stClub(
 function stLine(H,lab,keyN){const n=H.length,x=i=>50+i*(560/Math.max(1,n-1)),y=v=>190-1.7*v;
  return `<svg viewBox="0 0 640 250" style="width:100%;max-height:360px;margin-top:8px">${[0,50,100].map(v=>`<line x1="40" x2="630" y1="${y(v)}" y2="${y(v)}" stroke="#1a2a33"/><text x="8" y="${y(v)+4}" fill="#6b8290" font-size="11" font-family="monospace">${v}</text>`).join("")}
  <polyline fill="none" stroke="#00ff9c" stroke-width="3" points="${H.map((h,i)=>x(i)+','+y(h.m)).join(' ')}"/>
- ${H.map((h,i)=>`<circle cx="${x(i)}" cy="${y(h.m)}" r="5" fill="${i===n-1?'#ff4d6d':'#00ff9c'}"/><text x="${x(i)}" y="${y(h.m)-10}" fill="#d7e3ea" font-size="12" text-anchor="middle" font-family="monospace">${h.m}</text><text x="${x(i)}" y="214" fill="#6b8290" font-size="10" text-anchor="middle" font-family="monospace">${lab(h)}</text>${keyN?`<text x="${x(i)}" y="228" fill="#3f5866" font-size="9" text-anchor="middle" font-family="monospace"></text>`:''}`).join("")}</svg>`;}
+ ${H.map((h,i)=>`<circle cx="${x(i)}" cy="${y(h.m)}" r="5" fill="${i===n-1?'#ff4d6d':'#00ff9c'}"/><text x="${x(i)}" y="${y(h.m)-10}" fill="#d7e3ea" font-size="12" text-anchor="middle" font-family="monospace">${h.m}</text><text x="${x(i)}" y="214" fill="#6b8290" font-size="10" text-anchor="middle" font-family="monospace">${lab(h)}</text>${keyN?`<text x="${x(i)}" y="228" fill="#3f5866" font-size="9" text-anchor="middle" font-family="monospace">${h.n!=null?h.n+' posts':''}</text>`:''}`).join("")}</svg>`;}
 /* sentiment freshness line: rota weekday (0=Sun) per club; a club refreshes overnight on its weekday once its latest week ended 5+ days before */
 const ST_ROTA={lfc:4,brighton:4,brentford:4,united:5,leeds:5,everton:5,city:6,hull:6,ipswich:6,arsenal:0,newcastle:0,villa:0,spurs:1,palace:1,bournemouth:1,chelsea:2,coventry:2,fulham:2,forest:3,sunderland:3};
 const ST_UP={brighton:"2026-11-12",chelsea:"2026-11-03",brentford:"2026-11-12",leeds:"2026-11-06",everton:"2026-11-06",hull:"2026-11-06",ipswich:"2026-11-14",newcastle:"2026-11-14",villa:"2026-11-14",palace:"2026-11-02",bournemouth:"2026-11-02",coventry:"2026-11-16",fulham:"2026-11-16",forest:"2026-11-16",sunderland:"2026-11-16",lfc:"2026-11-12",united:"2026-11-12",city:"2026-11-06",arsenal:"2026-11-14",spurs:"2026-11-02"};
@@ -1590,7 +1590,7 @@ function stFresh(k,C){try{
  return `<div class="st-fresh"><span class="dot"></span>Last updated ${fmt(P(up))}${next?' · '+next:''}</div>`;
 }catch(e){return "";}}
 function stRenderClub(el,C){
- const days=Object.entries(C.days).map(([d,c])=>({l:new Date(d+"T12:00Z").toLocaleDateString("en-GB",{weekday:"short",day:"numeric"}),m:Math.round(100*(c.pos||0)/Math.max(1,(c.pos||0)+(c.neg||0))),n:(c.pos||0)+(c.neu||0)+(c.neg||0)}));
+ const days=Object.entries(C.days).map(([d,c])=>({l:new Date(d+"T12:00Z").toLocaleDateString("en-GB",{weekday:"short",day:"numeric"}),m:Math.round(100*((c.pos||0)+2)/((c.pos||0)+(c.neg||0)+4)),n:(c.pos||0)+(c.neu||0)+(c.neg||0)}));
  el.innerHTML=`
  <div class="lif-head"><h2>${C.name} fan mood</h2><span class="st-tag">Snapshot: ${C.range||"14–21 Oct 2026"}</span><span class="legend" style="margin-left:auto">by @tamerton · ${C.range||"14–21 Oct 2026"}</span></div>
  ${stFresh(C.key||stClub(),C)}
@@ -1600,7 +1600,7 @@ function stRenderClub(el,C){
    <div style="font-family:var(--mono);font-size:13px"><div style="color:var(--green)">${Math.round(100*C.P/C.N)}% positive</div><div class="muted">${Math.round(100*C.Ne/C.N)}% neutral / news</div><div style="color:var(--red)">${Math.round(100*C.Ng/C.N)}% negative</div></div></div>
    <div class="st-bar" style="height:10px"><span style="width:${C.mood}%;background:linear-gradient(90deg,var(--red),var(--gold),var(--green))"></span></div>
    <ul class="st-sum" style="font-size:13px;padding-left:18px;margin-top:14px">${C.sum.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-  <div class="card"><div class="legend">MOOD THROUGH THE WEEK (daily score, UTC days)</div>${stLine(days,h=>h.l,true)}</div>
+  <div class="card"><div class="legend">MOOD THROUGH THE WEEK (daily score out of 100)</div>${stLine(days,h=>h.l,true)}<div class="legend">0 = all negative · 50 = neutral · 100 = all positive. Quiet days with few opinions sit near 50.</div></div>
   <div class="card"><div class="legend">PLAYER LEADERBOARD (named in 8+ posts) <span style="color:var(--green)">■ pos</span> <span class="muted">■ neutral</span> <span style="color:var(--red)">■ neg</span></div>
    ${Object.entries(C.players).map(([k,c])=>{const [b,n]=stBar(c);return `<div class="st-row"><div>${k}</div>${b}${n}</div>`}).join("")}</div>
   <div class="card"><div class="legend">SENTIMENT BY TOPIC (a post can count twice)</div>
@@ -1614,7 +1614,7 @@ function stRenderClub(el,C){
 function stRenderLfc(el){
  const pl=Object.entries(ST.players), tp=Object.entries(ST.topics);
  const days=Object.entries(ST.days), lab=ST.lab||["Wed 14","Thu 15","Fri 16","Sat 17","Sun 18","Mon 19","Tue 20","Wed 21*"];
- const pts=days.map(([d,c],i)=>[40+i*80,190-170*((c.pos||0)+(c.neg||0)?(c.pos||0)/((c.pos||0)+(c.neg||0)):.5),Math.round(100*((c.pos||0)+(c.neg||0)?(c.pos||0)/((c.pos||0)+(c.neg||0)):.5))]);
+ const pts=days.map(([d,c],i)=>[40+i*80,190-170*(((c.pos||0)+2)/((c.pos||0)+(c.neg||0)+4)),Math.round(100*((c.pos||0)+2)/((c.pos||0)+(c.neg||0)+4))]);
  const mx=Math.max(...ST.themes.map(t=>t[1]));
  el.innerHTML=`
  <div class="lif-head"><h2>LFC fan mood</h2><span class="st-tag">Snapshot: ${ST.range||"14–21 Oct 2026"}</span><span class="legend" style="margin-left:auto">by @tamerton · ${ST.range||"14–21 Oct 2026"}</span></div>
@@ -1627,7 +1627,7 @@ function stRenderLfc(el){
    <ul class="st-sum" style="font-size:13px;padding-left:18px;margin-top:14px">${ST.sum.map(x=>`<li>${x}</li>`).join("")}</ul></div>
   <div class="card"><div class="legend">MOOD THROUGH THE WEEK (daily score; match days in red)</div>
    <svg viewBox="0 0 640 230" style="width:100%;margin-top:8px">
-    ${[0,50,100].map(v=>`<line x1="30" x2="630" y1="${190-1.7*v}" y2="${190-1.7*v}" stroke="#1a2a33"/><text x="0" y="${194-1.7*v}" fill="#6b8290" font-size="11" font-family="monospace">${v}</text>`).join("")}
+    ${[0,25,50,75,100].map(v=>`<line x1="30" x2="630" y1="${190-1.7*v}" y2="${190-1.7*v}" stroke="#1a2a33"/><text x="0" y="${194-1.7*v}" fill="#6b8290" font-size="11" font-family="monospace">${v}</text>`).join("")}
     <polyline fill="none" stroke="#00ff9c" stroke-width="3" points="${pts.map(p=>p[0]+','+p[1]).join(' ')}"/>
     ${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="${(ST.md||[0,3,6]).includes(i)?'#ff4d6d':'#00ff9c'}"/><text x="${p[0]}" y="${p[1]-10}" fill="#d7e3ea" font-size="12" text-anchor="middle" font-family="monospace">${p[2]}</text><text x="${p[0]}" y="212" fill="#6b8290" font-size="11" text-anchor="middle" font-family="monospace">${lab[i]}</text>`).join("")}
    </svg><div class="legend">${ST.mdl||""}</div></div>
