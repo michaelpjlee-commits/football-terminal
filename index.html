@@ -620,7 +620,7 @@ function renderTodayFx(R,F,T){
   const side=t=>{const m=tfRec(R,t), mg=TF_MGR[t]; return `<div class="tfrow"><div class="tfteam">${esc(t)} <span class="xg">(${posOf(t)})</span></div><div>${formTags(m.form)}</div>
     <div class="tfmgr">${mg?esc(mg)+" · ":""}P${m.P} W${m.W} D${m.D} L${m.L} · <span class="pp">${m.ppg} PPG</span></div></div>`;};
   $("tf-grid").innerHTML=list.map(f=>{const live=/in play/i.test(f.status);
-    return `<div class="tfm${live?" live":""}"><div class="tfh"><span>${isToday?"TODAY":esc(f.date.replace(/ \d{4}$/,""))} · <b>${esc(f.ko)}</b>${live?' <span class="tag t-live">LIVE</span>':''}</span><span class="tag t-gw">GW${f.gw}</span></div>${side(f.home)}${side(f.away)}</div>`;}).join("")||'<div class="tfmeta">No fixtures to show.</div>';
+    return `<div class="tfm${live?" live":""}"><div class="tfh"><span>${isToday?"TODAY":esc(f.date.replace(/ \d{4}$/,""))} · <b>${esc(f.ko)}</b>${live?' <span class="tag t-live">LIVE</span>':''}</span><span class="tag t-gw">GW${f.gw}</span> ${reportLink(f)}</div>${side(f.home)}${side(f.away)}</div>`;}).join("")||'<div class="tfmeta">No fixtures to show.</div>';
 }
 function render(D, fetchedAt, stale){
   const T=D.table, R=D.results, F=D.fixtures, TS=D.teams, PL=D.players;
@@ -701,7 +701,7 @@ function render(D, fetchedAt, stale){
   $("m-res").textContent=`${n} played · last 20 shown`;
   $("t-res").innerHTML=`<tr><th>GW</th><th>Date</th><th class="num">Home</th><th style="text-align:center">Score</th><th>Away</th><th class="num">xG</th></tr>`+
     last.map(r=>`<tr><td><span class="tag t-gw">GW${r.gw}</span></td><td class="mono">${esc(r.date.replace(/ \d{4}$/,""))}${/await|provisional/i.test(r.status)?' <span class="tag t-prov" title="Provisional">PROV</span>':''}</td>
-      <td class="num" style="font-family:inherit;${r.hg>r.ag?'color:'+C.green+';font-weight:600':''}">${esc(r.home)}</td><td style="text-align:center"><span class="score">${r.hg} – ${r.ag}</span></td>
+      <td class="num" style="font-family:inherit;${r.hg>r.ag?'color:'+C.green+';font-weight:600':''}">${esc(r.home)}</td><td style="text-align:center"><span class="score">${r.hg} – ${r.ag}</span> ${reportLink(r)}</td>
       <td style="${r.ag>r.hg?'color:'+C.green+';font-weight:600':''}">${esc(r.away)}</td><td class="num xg">${r.hxg!=null?f1(r.hxg)+' – '+f1(r.axg):''}</td></tr>`).join("");
 
   // Top scorers
@@ -745,6 +745,7 @@ function render(D, fetchedAt, stale){
 
 /* ---------- match reports (gw|home|away -> page) ---------- */
 const MATCH_REPORTS={"8|Liverpool|Brighton":"reports/2026-10-25-liverpool-v-brighton.html","9|Liverpool|Arsenal":"reports/2026-11-01-liverpool-v-arsenal.html","10|Crystal Palace|Liverpool":"reports/2026-11-08-crystal-palace-v-liverpool.html","11|Liverpool|Man Utd":"reports/2026-11-22-liverpool-v-manchester-united.html"};
+function reportLink(r){ const u=MATCH_REPORTS[(r.gw||"")+"|"+(r.home||"")+"|"+(r.away||"")]; return u?`<a class="mr-link" href="${u}">Report</a>`:""; }
 /* cup and other non-league reports (shown under Results on each club's Fixtures tab) */
 const CUP_REPORTS=[{teams:["Celtic","Besiktas"],date:"Thu 05 Nov",comp:"Europa League",home:"Celtic",away:"Beşiktaş",score:"3-2",note:"",url:"reports/2026-11-05-celtic-v-besiktas.html"},{teams:["Liverpool","Fenerbahce"],date:"Wed 04 Nov",comp:"Champions League MD4",home:"Fenerbahce",away:"Liverpool",score:"3-2",note:"",url:"reports/2026-11-04-fenerbahce-v-liverpool.html"},{teams:["Liverpool","Chelsea"],date:"Wed 28 Oct",comp:"Carabao Cup R4",home:"Liverpool",away:"Chelsea",score:"1-1",note:"Liverpool win 6-5 on pens",url:"reports/2026-10-28-liverpool-v-chelsea.html"}];
 function cupRepPanel(team){ const L=CUP_REPORTS.filter(r=>r.teams.includes(team)); if(!L.length) return ""; return fmPanel(`Cup match reports · ${L.length}`,`<div class="fm-scroll"><table><tr><th>Date</th><th class="l">Competition</th><th class="l">Match</th><th>Score</th><th></th></tr>${L.map(r=>`<tr><td>${esc(r.date)}</td><td class="nm" style="font-weight:400">${esc(r.comp)}</td><td class="nm">${esc(r.home)} v ${esc(r.away)}</td><td class="b">${esc(r.score)}${r.note?` <small>(${esc(r.note)})</small>`:''}</td><td><a class="mr-link" href="${r.url}">MATCH REPORT ↗</a></td></tr>`).join("")}</table></div>`); }
@@ -1454,7 +1455,7 @@ function renderSquad(){
   const injh=inj.map(p=>`<div class="inj">${av(p)}<div><b>${esc(p.name)}</b> <span class="badge ${esc(p.pos)}">${esc(p.pos)}</span>${p.status&&!/injured/i.test(p.status)?` <span class="muted" style="font-size:11px">${esc(p.status)}${p.chance!=null&&!/unavailable|suspended/i.test(p.status)?' · '+p.chance+'% chance':''}</span>`:''}<div class="news2">${esc(p.news||p.status)}</div></div></div>`).join("")||'<div class="muted">No injuries or doubts reported</div>';
   const res=D.results.filter(r=>r.home===team||r.away===team).slice(-5).reverse();
   const formh=res.map(r=>{ const home=r.home===team, opp=home?r.away:r.home, lg=home?r.hg:r.ag, og=home?r.ag:r.hg, lx=home?r.hxg:r.axg, ox=home?r.axg:r.hxg; const o=lg>og?"W":lg===og?"D":"L";
-    return `<div class="fr"><span class="wdl ${o}">${o}</span><span class="frd">${esc((r.date||"").replace(/^\w+ /,"").replace(/ \d{4}$/,""))}${/await|provisional/i.test(r.status)?'*':''}</span><span class="fro">${esc(opp)} <small>(${home?"H":"A"})</small></span><span class="frs">${lg}-${og}</span><span class="frx">${lx!=null?`xG ${lx.toFixed(2)}-${ox.toFixed(2)}`:''}</span></div>`; }).join("")||'<div class="muted">No games yet</div>';
+    return `<div class="fr"><span class="wdl ${o}">${o}</span><span class="frd">${esc((r.date||"").replace(/^\w+ /,"").replace(/ \d{4}$/,""))}${/await|provisional/i.test(r.status)?'*':''}</span><span class="fro">${esc(opp)} <small>(${home?"H":"A"})</small></span><span class="frs">${lg}-${og}</span> ${reportLink(r)}<span class="frx">${lx!=null?`xG ${lx.toFixed(2)}-${ox.toFixed(2)}`:''}</span></div>`; }).join("")||'<div class="muted">No games yet</div>';
   const posOf=t=>{const r=D.table.find(x=>x.team===t); return r?r.pos:null;};
   const nx=D.fixtures.filter(f=>(f.home===team||f.away===team)&&!/in play/i.test(f.status)).slice(0,3);
   const nxh=nx.map(f=>{ const home=f.home===team, opp=home?f.away:f.home;
